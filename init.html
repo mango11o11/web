@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>八诗八景 · 诗润新安 水韵舍北</title>
+    <style>
+        /* ===== 全局重置 & 设计变量（对应八诗八景品牌色） ===== */
+        :root {
+            --primary: #1a4a3a;      /* 水韵深绿 */
+            --primary-light: #2a6a52;
+            --gold: #c9a96e;         /* 诗韵鎏金 */
+            --gold-light: #e8d5b0;
+            --cream: #f7f2e9;        /* 古纸米白 */
+            --text-dark: #2c2c2c;
+            --text-light: #6b6b6b;
+            --shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --radius: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            background-color: var(--cream);
+            color: var(--text-dark);
+            max-width: 430px;
+            margin: 0 auto;
+            padding-bottom: 80px;  /* 为底部导航留空间 */
+            position: relative;
+            min-height: 100vh;
+        }
+
+        /* ===== 页面容器 ===== */
+        .page {
+            display: none;
+            padding: 20px 16px 30px;
+            animation: fadeUp 0.35s ease;
+        }
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeUp {
+            0% { opacity: 0; transform: translateY(12px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== 顶部导航标题栏 ===== */
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0 16px;
+            border-bottom: 1px solid rgba(0,0,0,0.04);
+            margin-bottom: 20px;
+        }
+        .app-header .logo {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: 0.5px;
+        }
+        .app-header .logo span {
+            color: var(--gold);
+        }
+        .app-header .back-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--text-light);
+            cursor: pointer;
+            padding: 4px 8px;
+            display: none;
+        }
+        .page.active .app-header .back-btn {
+            display: block;
+        }
+        /* 在首页隐藏返回按钮 */
+        #page-home .app-header .back-btn {
+            display: none !important;
+        }
+
+        /* ===== 底部导航 ===== */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 430px;
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0 20px;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 -2px 16px rgba(0,0,0,0.04);
+            z-index: 100;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 11px;
+            color: var(--text-light);
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: color 0.2s;
+            padding: 4px 12px;
+            gap: 2px;
+        }
+        .nav-item .nav-icon {
+            font-size: 22px;
+            line-height: 1.2;
+        }
+        .nav-item.active {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* ===== 首页 ===== */
+        .hero-card {
+            background: linear-gradient(145deg, var(--primary), #0f3327);
+            border-radius: var(--radius);
+            padding: 28px 22px 24px;
+            color: white;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 24px rgba(26,74,58,0.25);
+        }
+        .hero-card h1 {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .hero-card h1 small {
+            display: block;
+            font-size: 14px;
+            font-weight: 400;
+            opacity: 0.8;
+            margin-top: 4px;
+            letter-spacing: 0px;
+        }
+        .hero-card .sub {
+            margin-top: 14px;
+            font-size: 14px;
+            opacity: 0.9;
+            line-height: 1.5;
+            border-left: 3px solid var(--gold);
+            padding-left: 14px;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+        .quick-actions .qa-btn {
+            background: white;
+            border: none;
+            border-radius: 12px;
+            padding: 16px 6px;
+            box-shadow: var(--shadow);
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: 0.2s;
+            text-align: center;
+        }
+        .quick-actions .qa-btn .qa-icon {
+            display: block;
+            font-size: 26px;
+            margin-bottom: 6px;
+        }
+        .quick-actions .qa-btn:active {
+            transform: scale(0.96);
+            background: #f5f0e8;
+        }
+
+        /* ===== 卡片列表（通用） ===== */
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .section-title .more {
+            font-size: 13px;
+            font-weight: 400;
+            color: var(--text-light);
+        }
+
+        .card-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .card-item {
+            background: white;
+            border-radius: var(--radius);
+            padding: 16px;
+            box-shadow: var(--shadow);
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid rgba(0,0,0,0.02);
+        }
+        .card-item:active {
+            transform: scale(0.98);
+            background: #f8f4ee;
+        }
+        .card-item .card-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            background: var(--cream);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            flex-shrink: 0;
+            background: #e8e0d4;
+        }
+        .card-item .card-info {
+            flex: 1;
+        }
+        .card-item .card-info h4 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+        .card-item .card-info p {
+            font-size: 13px;
+            color: var(--text-light);
+            line-height: 1.4;
+        }
+        .card-item .card-tag {
+            font-size: 11px;
+            background: var(--gold-light);
+            color: var(--primary);
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+
+        /* ===== 线路导览页 ===== */
+        .map-placeholder {
+            background: #dce8e0;
+            border-radius: var(--radius);
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-weight: 500;
+            margin-bottom: 20px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><polyline points="10,80 30,30 50,60 70,20 90,70" stroke="%231a4a3a" stroke-width="2" fill="none" opacity="0.3"/><circle cx="30" cy="30" r="4" fill="%23c9a96e"/><circle cx="70" cy="20" r="4" fill="%23c9a96e"/><circle cx="90" cy="70" r="4" fill="%23c9a96e"/></svg>');
+            background-size: cover;
+            background-blend-mode: overlay;
+        }
+        .map-placeholder span {
+            background: rgba(255,255,255,0.8);
+            padding: 6px 18px;
+            border-radius: 30px;
+            font-size: 14px;
+        }
+
+        /* ===== 研学预约 ===== */
+        .product-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 18px;
+            box-shadow: var(--shadow);
+            margin-bottom: 14px;
+            border-left: 4px solid var(--gold);
+        }
+        .product-card h4 {
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+        .product-card .price {
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 18px;
+            margin: 6px 0;
+        }
+        .product-card .desc {
+            font-size: 13px;
+            color: var(--text-light);
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.2s;
+            display: inline-block;
+        }
+        .btn-primary:active {
+            transform: scale(0.96);
+            background: var(--primary-light);
+        }
+
+        /* ===== 商城 ===== */
+        .shop-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+        .shop-item {
+            background: white;
+            border-radius: var(--radius);
+            padding: 14px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+        .shop-item .shop-emoji {
+            font-size: 40px;
+            margin-bottom: 6px;
+        }
+        .shop-item h5 {
+            font-size: 14px;
+        }
+        .shop-item .shop-price {
+            color: var(--primary);
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        /* ===== 个人中心 ===== */
+        .profile-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 24px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+        .profile-card .avatar {
+            font-size: 56px;
+            margin-bottom: 6px;
+        }
+        .profile-card .name {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .profile-menu {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        .profile-menu .menu-item {
+            padding: 16px 18px;
+            border-bottom: 1px solid #f0ece4;
+            display: flex;
+            justify-content: space-between;
+            font-size: 15px;
+            cursor: pointer;
+        }
+        .profile-menu .menu-item:last-child {
+            border-bottom: none;
+        }
+        .profile-menu .menu-item:active {
+            background: #f5f0e8;
+        }
+        .profile-menu .menu-item .arrow {
+            color: var(--text-light);
+        }
+
+        /* ===== 详情页（通用弹窗/页面） ===== */
+        #page-detail .detail-content {
+            background: white;
+            border-radius: var(--radius);
+            padding: 24px 20px;
+            box-shadow: var(--shadow);
+        }
+        #page-detail .detail-content h2 {
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+        #page-detail .detail-content .meta {
+            color: var(--text-light);
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+        #page-detail .detail-content p {
+            line-height: 1.7;
+            font-size: 15px;
+            color: #3d3d3d;
+        }
+
+        /* ===== 工具类 ===== */
+        .text-center { text-align: center; }
+        .mt-8 { margin-top: 8px; }
+        .mb-8 { margin-bottom: 8px; }
+        .gap-8 { gap: 8px; }
+        .flex { display: flex; }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================================ -->
+    <!-- 首页 -->
+    <!-- ============================================================ -->
+    <div id="page-home" class="page active">
+        <div class="app-header">
+            <div class="logo">八诗<span>八景</span></div>
+            <button class="back-btn" onclick="goHome()">‹ 返回</button>
+        </div>
+
+        <div class="hero-card">
+            <h1>
+                诗润新安 · 水韵舍北
+                <small>八诗八景 · 农文旅融合发展</small>
+            </h1>
+            <div class="sub">
+                “沈约登台望月，你登台立志。<br>桥是起点，也是你在这条诗路上的第一次抬头。”
+            </div>
+        </div>
+
+        <div class="quick-actions">
+            <button class="qa-btn" onclick="navigateTo('page-route')">
+                <span class="qa-icon">🗺️</span> 线路导览
+            </button>
+            <button class="qa-btn" onclick="navigateTo('page-study')">
+                <span class="qa-icon">📖</span> 研学预约
+            </button>
+            <button class="qa-btn" onclick="navigateTo('page-shop')">
+                <span class="qa-icon">🎁</span> 文创商城
+            </button>
+        </div>
+
+        <div class="section-title">
+            <span>🌟 八咏诗路 · 八景推荐</span>
+            <span class="more" onclick="navigateTo('page-route')">查看全部 →</span>
+        </div>
+        <div class="card-list">
+            <div class="card-item" onclick="showDetail('万善桥 · 登台立志','踏桥即入诗，桥头设登台石，桥身望秋台。')">
+                <div class="card-icon">🌉</div>
+                <div class="card-info">
+                    <h4>万善桥 · 登台立志</h4>
+                    <p>宋元国保 · 走桥文化</p>
+                </div>
+                <span class="card-tag">起点</span>
+            </div>
+            <div class="card-item" onclick="showDetail('沈约纪念馆 · 咏竹明志','读八咏、选心念诗、抄诗。知其人，立其志。')">
+                <div class="card-icon">🎋</div>
+                <div class="card-info">
+                    <h4>沈约纪念馆 · 咏竹明志</h4>
+                    <p>崇学向善 · 精神地标</p>
+                </div>
+                <span class="card-tag">核心</span>
+            </div>
+            <div class="card-item" onclick="showDetail('文化礼堂 · 感雪归乡','诗路终点，全景沙盘，冬季初雪。')">
+                <div class="card-icon">❄️</div>
+                <div class="card-info">
+                    <h4>文化礼堂 · 感雪归乡</h4>
+                    <p>归乡广场 · 沈约诗路沙盘</p>
+                </div>
+                <span class="card-tag">终点</span>
+            </div>
+        </div>
+
+        <p style="text-align:center; font-size:12px; color:var(--text-light); padding:20px 0 10px;">
+            “创意，让乡村更美好” · 浙江水利水电学院
+        </p>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 线路导览页 -->
+    <!-- ============================================================ -->
+    <div id="page-route" class="page">
+        <div class="app-header">
+            <div class="logo">🗺️ 线路导览</div>
+            <button class="back-btn" onclick="goHome()">‹ 返回</button>
+        </div>
+
+        <div class="map-placeholder">
+            <span>📍 八咏诗路 · 下舍片区组团</span>
+        </div>
+
+        <div class="section-title">📌 八景主节点</div>
+        <div class="card-list">
+            <div class="card-item" onclick="showDetail('万善桥 · 登台立志','桥头登台石，桥身望秋台，诗路折页领取。踏石即入诗。')">
+                <div class="card-icon">1</div>
+                <div class="card-info"><h4>万善桥 · 登台立志</h4><p>舍北村 · 国保宋元古桥</p></div>
+            </div>
+            <div class="card-item" onclick="showDetail('院士馆 · 怀人仰贤','崇学堂内敬先贤，怀人廊下系福带。')">
+                <div class="card-icon">2</div>
+                <div class="card-info"><h4>德清院士馆 · 怀人仰贤</h4><p>舍北村 · 崇学精神传承</p></div>
+            </div>
+            <div class="card-item" onclick="showDetail('沈约三景 · 咏竹明志','纪念馆→纪念碑→公园，知竹·成竹·行竹。')">
+                <div class="card-icon">3</div>
+                <div class="card-info"><h4>沈约三景 · 咏竹明志</h4><p>舍北村 · 精神地标群</p></div>
+            </div>
+            <div class="card-item" onclick="showDetail('笼式足球场 · 听风逐风','听风草坪，放风筝、踢球，风可听可玩。')">
+                <div class="card-icon">4</div>
+                <div class="card-info"><h4>笼式足球场 · 听风逐风</h4><p>舍北村 · 活力运动</p></div>
+            </div>
+            <div class="card-item" onclick="showDetail('文化礼堂 · 感雪归乡','全景沙盘，冬季造雪，诗路终点归乡。')">
+                <div class="card-icon">5</div>
+                <div class="card-info"><h4>文化礼堂 · 感雪归乡</h4><p>舍北村 · 五星级礼堂</p></div>
+            </div>
+            <div class="card-item" onclick="showDetail('下舍礼堂 · 望秋远眺','千平电影厅改建，大舞台，研学集散枢纽。')">
+                <div class="card-icon">6</div>
+                <div class="card-info"><h4>下舍礼堂 · 望秋远眺</h4><p>下舍村 · 废弃影厅新生</p></div>
+            </div>
+            <div class="card-item" onclick="showDetail('舍东围巾馆 · 临水照心','百年围巾史，手作工坊，织一首诗。')">
+                <div class="card-icon">7</div>
+                <div class="card-info"><h4>舍东围巾馆 · 临水照心</h4><p>舍东村 · 围巾产业文化</p></div>
+            </div>
+            <div class="card-item" onclick="showDetail('陶琪漾 · 对月咏怀','水上诗台，八咏居民宿，月下诗会。')">
+                <div class="card-icon">8</div>
+                <div class="card-info"><h4>孙家桥陶琪漾 · 对月咏怀</h4><p>孙家桥村 · 1200亩水域</p></div>
+            </div>
+        </div>
+
+        <div style="background:var(--gold-light); border-radius:var(--radius); padding:14px 18px; margin-top:8px;">
+            <p style="font-size:14px; font-weight:500; color:var(--primary);">
+                💡 游线建议：万善桥（起点）→ 院士馆 → 沈约三景 → 笼式足球场 → 文化礼堂（终点） ｜ 周边延伸三景可选
+            </p>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 研学预约页 -->
+    <!-- ============================================================ -->
+    <div id="page-study" class="page">
+        <div class="app-header">
+            <div class="logo">📖 研学预约</div>
+            <button class="back-btn" onclick="goHome()">‹ 返回</button>
+        </div>
+
+        <div class="section-title">🎓 八咏诗路研学套餐</div>
+
+        <div class="product-card">
+            <h4>半日 · 诗路启蒙</h4>
+            <div class="price">¥ 68 / 人</div>
+            <div class="desc">万善桥登台立志 → 沈约纪念馆读诗 → 院士馆仰贤。含折页、诗牌、祈福带。</div>
+            <button class="btn-primary" onclick="alert('✅ 预约成功！我们将尽快联系您。')">立即预约</button>
+        </div>
+
+        <div class="product-card">
+            <h4>一日 · 崇学明志</h4>
+            <div class="price">¥ 168 / 人</div>
+            <div class="desc">半日内容 + 沈约公园竹编手作 + 文化礼堂全景沙盘 + 诗路午餐（舍北村农家餐）。</div>
+            <button class="btn-primary" onclick="alert('✅ 预约成功！我们将尽快联系您。')">立即预约</button>
+        </div>
+
+        <div class="product-card">
+            <h4>两日 · 诗韵归乡</h4>
+            <div class="price">¥ 468 / 人</div>
+            <div class="desc">一日内容 + 舍东围巾手作 + 陶琪漾水上诗会 + 八咏居民宿一晚 + 晨曦采摘体验。</div>
+            <button class="btn-primary" onclick="alert('✅ 预约成功！我们将尽快联系您。')">立即预约</button>
+        </div>
+
+        <p style="font-size:12px; color:var(--text-light); margin-top:10px; text-align:center;">
+            * 团队定制可联系舍北村运营中心
+        </p>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 文创商城页 -->
+    <!-- ============================================================ -->
+    <div id="page-shop" class="page">
+        <div class="app-header">
+            <div class="logo">🎁 文创商城</div>
+            <button class="back-btn" onclick="goHome()">‹ 返回</button>
+        </div>
+
+        <div class="shop-grid">
+            <div class="shop-item" onclick="alert('🛒 已加入购物车')">
+                <div class="shop-emoji">📜</div>
+                <h5>八咏诗路·折页</h5>
+                <div class="shop-price">¥ 18</div>
+            </div>
+            <div class="shop-item" onclick="alert('🛒 已加入购物车')">
+                <div class="shop-emoji">🧣</div>
+                <h5>舍东·诗巾</h5>
+                <div class="shop-price">¥ 88</div>
+            </div>
+            <div class="shop-item" onclick="alert('🛒 已加入购物车')">
+                <div class="shop-emoji">🎋</div>
+                <h5>竹简·诗牌</h5>
+                <div class="shop-price">¥ 38</div>
+            </div>
+            <div class="shop-item" onclick="alert('🛒 已加入购物车')">
+                <div class="shop-emoji">🕯️</div>
+                <h5>望秋月·香薰</h5>
+                <div class="shop-price">¥ 56</div>
+            </div>
+            <div class="shop-item" onclick="alert('🛒 已加入购物车')">
+                <div class="shop-emoji">🧧</div>
+                <h5>祈福带·崇学</h5>
+                <div class="shop-price">¥ 12</div>
+            </div>
+            <div class="shop-item" onclick="alert('🛒 已加入购物车')">
+                <div class="shop-emoji">📘</div>
+                <h5>沈约八咏·手抄本</h5>
+                <div class="shop-price">¥ 28</div>
+            </div>
+        </div>
+        <p style="text-align:center; font-size:12px; color:var(--text-light); margin-top:18px;">
+            🚚 所有文创均含“八诗八景”品牌视觉，满99元包邮
+        </p>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 个人中心页 -->
+    <!-- ============================================================ -->
+    <div id="page-profile" class="page">
+        <div class="app-header">
+            <div class="logo">👤 我的</div>
+            <button class="back-btn" onclick="goHome()">‹ 返回</button>
+        </div>
+
+        <div class="profile-card">
+            <div class="avatar">🌾</div>
+            <div class="name">诗路旅人</div>
+            <p style="color:var(--text-light); font-size:14px; margin-top:4px;">已走过 3/8 景</p>
+            <div style="background:var(--cream); height:6px; border-radius:10px; margin-top:12px; width:100%;">
+                <div style="background:var(--gold); height:6px; border-radius:10px; width:37.5%;"></div>
+            </div>
+        </div>
+
+        <div class="profile-menu">
+            <div class="menu-item" onclick="navigateTo('page-route')">我的足迹 <span class="arrow">›</span></div>
+            <div class="menu-item" onclick="alert('📋 您有1个待完成的研学订单')">我的订单 <span class="arrow">›</span></div>
+            <div class="menu-item" onclick="alert('🎫 您收藏了3个景点')">我的收藏 <span class="arrow">›</span></div>
+            <div class="menu-item" onclick="alert('📞 请联系舍北村运营中心 0572-xxxxxxx')">联系村委 <span class="arrow">›</span></div>
+            <div class="menu-item" onclick="alert('📖 八诗八景 · 诗润新安 水韵舍北  v1.0')">关于 <span class="arrow">›</span></div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 详情页（共用） -->
+    <!-- ============================================================ -->
+    <div id="page-detail" class="page">
+        <div class="app-header">
+            <div class="logo" id="detail-title">📍 景点详情</div>
+            <button class="back-btn" onclick="goHome()">‹ 返回</button>
+        </div>
+        <div class="detail-content" id="detail-content">
+            <h2 id="detail-name">节点名称</h2>
+            <div class="meta" id="detail-meta">八诗八景 · 舍北</div>
+            <p id="detail-desc">详细描述加载中...</p>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 底部导航 -->
+    <!-- ============================================================ -->
+    <nav class="bottom-nav">
+        <button class="nav-item active" data-page="page-home">
+            <span class="nav-icon">🏠</span> 首页
+        </button>
+        <button class="nav-item" data-page="page-route">
+            <span class="nav-icon">🗺️</span> 线路
+        </button>
+        <button class="nav-item" data-page="page-study">
+            <span class="nav-icon">📖</span> 研学
+        </button>
+        <button class="nav-item" data-page="page-shop">
+            <span class="nav-icon">🎁</span> 商城
+        </button>
+        <button class="nav-item" data-page="page-profile">
+            <span class="nav-icon">👤</span> 我的
+        </button>
+    </nav>
+
+    <script>
+        // ================================================================
+        // 导航核心逻辑
+        // ================================================================
+
+        // 切换页面
+        function navigateTo(pageId) {
+            // 隐藏所有页面
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            // 显示目标页面
+            const target = document.getElementById(pageId);
+            if (target) target.classList.add('active');
+
+            // 更新底部导航高亮
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.page === pageId);
+            });
+
+            // 滚动到顶部
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 返回首页
+        function goHome() {
+            navigateTo('page-home');
+        }
+
+        // 底部导航点击
+        document.querySelectorAll('.nav-item').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const pageId = this.dataset.page;
+                if (pageId) navigateTo(pageId);
+            });
+        });
+
+        // 显示详情（从卡片点击进入）
+        function showDetail(name, desc) {
+            document.getElementById('detail-name').textContent = name;
+            document.getElementById('detail-desc').textContent = desc || '八诗八景 · 诗润新安 水韵舍北';
+            document.getElementById('detail-meta').textContent = '📍 八诗八景 · 舍北片区';
+            navigateTo('page-detail');
+        }
+
+        // ================================================================
+        // 补一些增强体验的细节（可忽略）
+        // ================================================================
+
+        // 给所有卡片加一点点击涟漪反馈（纯装饰）
+        document.querySelectorAll('.card-item, .qa-btn, .product-card .btn-primary, .shop-item, .profile-menu .menu-item').forEach(el => {
+            el.addEventListener('click', function(e) {
+                // 仅做触感反馈，无实际功能
+            });
+        });
+
+        console.log('✅ 八诗八景 · 数字服务平台已加载');
+        console.log('📌 设计说明：品牌色 #1a4a3a 水韵深绿 + #c9a96e 诗韵鎏金');
+        console.log('📱 适配手机 375px ~ 430px 宽度');
+    </script>
+</body>
+</html>

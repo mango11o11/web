@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#F5F0E4">
+<title>诗润新安 水韵舍北 · 八诗八景数字旅游服务平台</title>
+<style>
+/* ============================================================
+   诗润新安 · 水韵舍北 —— 八诗八景数字旅游服务平台原型
+   设计规范：清雅宋韵 / 淡彩江南 / 诗词极简美学
+   主色：宣纸米白·桥体青灰·水墨浅黑
+   辅色：竹青·水碧·月白·荷塘浅绿·诗笺淡粉·宋韵浅金
+   全部资源内嵌，离线可用
+   ============================================================ */
+:root{
+  /* 品牌色彩系统（第二章/第四章规范） */
+  --paper:#F5F0E4;        /* 宣纸米白 */
+  --paper-deep:#EFE9D8;   /* 宣纸加深 */
+  --paper-card:#FBF8F0;   /* 卡片底 */
+  --ink:#2A2A26;          /* 水墨浅黑 */
+  --ink-soft:#55544C;     /* 次级墨 */
+  --ink-faint:#8C8A7D;    /* 弱化墨 */
+  --bridge:#8A8F88;       /* 桥体青灰 */
+  --bridge-dark:#6E736E;  /* 桥体深灰 */
+  --zhu:#5C7A5E;          /* 竹青 */
+  --zhu-deep:#47624A;
+  --shui:#6F9A92;         /* 水碧 */
+  --shui-deep:#4E7C74;
+  --yue:#EDE8DA;          /* 月白 */
+  --yue-soft:#F2EFE5;
+  --he:#A8BC96;           /* 荷塘浅绿 */
+  --fen:#E4D2C2;          /* 诗笺淡粉 */
+  --jin:#C2A46A;          /* 宋韵浅金 */
+  --jin-soft:#D9C49A;
+  --line:#E0DACA;         /* 分隔线 */
+  --danger:#B4655C;
+
+  /* 字体 */
+  --font-title:"Songti SC","Noto Serif CJK SC","Source Han Serif SC","SimSun",serif;
+  --font-body:-apple-system,BlinkMacSystemFont,"PingFang SC","HarmonyOS Sans SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+
+  --radius:18px;
+  --radius-sm:12px;
+  --shadow-sm:0 2px 10px rgba(60,58,45,.08);
+  --shadow-md:0 8px 26px rgba(60,58,45,.12);
+  --shadow-lg:0 16px 44px rgba(60,58,45,.18);
+  --tabbar-h:64px;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html{scroll-behavior:smooth;scrollbar-width:none;-ms-overflow-style:none;}
+html::-webkit-scrollbar{display:none;}
+body{
+  font-family:var(--font-body);
+  color:var(--ink);
+  background:#EFEADB;
+  -webkit-font-smoothing:antialiased;
+  line-height:1.6;
+  overscroll-behavior-y:none;
+  scrollbar-width:none;-ms-overflow-style:none;
+}
+body::-webkit-scrollbar{display:none;}
+
+/* ---------- 桌面端居中容器 ---------- */
+.app{
+  position:relative;
+  max-width:430px;
+  margin:0 auto;
+  min-height:100vh;
+  min-height:100dvh;
+  background:
+    radial-gradient(1200px 600px at 120% -10%, rgba(168,188,150,.28), transparent 60%),
+    radial-gradient(900px 500px at -20% 8%, rgba(226,213,194,.35), transparent 55%),
+    var(--paper);
+  background-attachment:fixed;
+  box-shadow:0 0 60px rgba(60,58,45,.18);
+  overflow-x:hidden;
+}
+@media(min-width:431px){
+  .app{border-left:1px solid var(--line);border-right:1px solid var(--line);}
+}
+
+/* 宣纸噪点纹理 */
+.app::before{
+  content:"";position:fixed;inset:0;max-width:430px;margin:0 auto;pointer-events:none;z-index:2;
+  opacity:.05;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+}
+
+/* ============ 视图容器 ============ */
+.page{
+  position:relative;
+  min-height:100vh;min-height:100dvh;
+  padding-bottom:calc(var(--tabbar-h) + 24px);
+  display:none;
+  -webkit-overflow-scrolling:touch;
+}
+.page.active{display:block;animation:pageIn .42s cubic-bezier(.22,.8,.36,1);}
+@keyframes pageIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+
+/* 顶部安全区 */
+.safe-top{height:env(safe-area-inset-top,0px);}
+.app-header{
+  position:sticky;top:0;z-index:30;
+  background:rgba(245,240,228,.82);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+}
+.app-header .bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 20px;
+}
+.header-brand{display:flex;align-items:center;gap:10px;}
+.header-logo{
+  width:34px;height:34px;flex:0 0 34px;
+  border-radius:10px;overflow:hidden;
+  background:linear-gradient(135deg,var(--zhu),var(--shui-deep));
+  display:flex;align-items:center;justify-content:center;
+}
+.header-brand .t1{font-family:var(--font-title);font-weight:700;font-size:17px;letter-spacing:.06em;}
+.header-brand .t2{font-size:10.5px;color:var(--ink-soft);letter-spacing:.14em;margin-top:-2px;}
+.header-actions{display:flex;gap:6px;}
+.icon-btn{
+  width:36px;height:36px;border-radius:50%;border:none;background:rgba(255,255,255,.6);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  box-shadow:var(--shadow-sm);
+}
+.icon-btn svg{width:18px;height:18px;stroke:var(--ink-soft);fill:none;stroke-width:1.7;}
+
+/* 返回按钮（详情页） */
+.header-back{display:flex;align-items:center;gap:4px;cursor:pointer;}
+.header-back svg{width:20px;height:20px;stroke:var(--ink);fill:none;stroke-width:2;}
+.header-back span{font-size:15px;}
+
+/* ============ 通用组件 ============ */
+.pad{padding:18px 20px;}
+.section{margin-top:8px;}
+.section-title{
+  display:flex;align-items:baseline;justify-content:space-between;
+  margin:22px 20px 12px;
+}
+.section-title .st{
+  font-family:var(--font-title);font-size:19px;font-weight:700;letter-spacing:.05em;
+  position:relative;
+}
+.section-title .st::after{
+  content:"";position:absolute;left:0;bottom:-3px;width:26px;height:2px;
+  background:linear-gradient(90deg,var(--zhu),transparent);
+}
+.section-title .more{font-size:12px;color:var(--ink-faint);cursor:pointer;display:flex;align-items:center;gap:2px;}
+
+/* 卡片 */
+.card{
+  background:var(--paper-card);
+  border:1px solid rgba(224,218,202,.7);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow-sm);
+  overflow:hidden;
+  cursor:pointer;
+  transition:transform .22s cubic-bezier(.2,.8,.3,1),box-shadow .22s;
+}
+.card:active{transform:scale(.975);box-shadow:var(--shadow-sm);}
+
+.tag{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:11px;letter-spacing:.05em;
+  padding:3px 9px;border-radius:20px;
+  background:rgba(92,122,94,.12);color:var(--zhu-deep);
+  border:1px solid rgba(92,122,94,.25);
+}
+.tag.shui{background:rgba(111,154,146,.12);color:var(--shui-deep);border-color:rgba(111,154,146,.28);}
+.tag.jin{background:rgba(194,164,106,.15);color:#8a6a2f;border-color:rgba(194,164,106,.35);}
+.tag.fen{background:rgba(228,210,194,.3);color:#9a6f57;border-color:rgba(228,210,194,.6);}
+
+/* 按钮 */
+.btn{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  border:none;border-radius:14px;cursor:pointer;
+  font-family:var(--font-body);font-size:15px;font-weight:500;
+  padding:13px 18px;transition:transform .18s,box-shadow .18s;
+}
+.btn:active{transform:scale(.97);}
+.btn-primary{
+  background:linear-gradient(135deg,var(--zhu),var(--shui-deep));
+  color:#fff;box-shadow:0 8px 20px rgba(71,98,74,.32);
+}
+.btn-ghost{background:rgba(255,255,255,.7);color:var(--zhu-deep);border:1px solid rgba(92,122,94,.35);}
+.btn-block{width:100%;}
+.btn-sm{padding:8px 14px;font-size:13px;border-radius:10px;}
+
+/* 分隔 */
+.divider{height:1px;background:var(--line);margin:0 20px;}
+
+/* 诗句装饰 */
+.poem-line{
+  font-family:var(--font-title);color:var(--ink-faint);
+  text-align:center;letter-spacing:.12em;line-height:2;
+}
+
+/* ============ 首页 ============ */
+.hero{
+  position:relative;margin:16px 20px 4px;border-radius:22px;overflow:hidden;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.05),rgba(30,42,34,.15)),
+    linear-gradient(135deg,#6E8E70,#4E7C74 55%,#3E665F);
+  color:#F4F1E6;box-shadow:var(--shadow-md);
+}
+.hero::after{
+  content:"";position:absolute;right:-30px;bottom:-34px;width:170px;height:170px;border-radius:50%;
+  background:radial-gradient(circle,rgba(242,239,229,.34),transparent 68%);
+}
+.hero-svg{position:absolute;inset:0;opacity:.5;}
+.hero-in{position:relative;padding:30px 24px 26px;z-index:3;}
+.hero-kicker{font-size:11px;letter-spacing:.3em;color:#E6DEC6;display:flex;align-items:center;gap:8px;}
+.hero-kicker::before{content:"";width:22px;height:1px;background:#E6DEC6;}
+.hero-title{font-family:var(--font-title);font-size:27px;font-weight:700;letter-spacing:.1em;margin:12px 0 6px;line-height:1.35;}
+.hero-title .accent{color:#EFE0BE;}
+.hero-sub{font-size:13px;color:rgba(244,241,230,.85);letter-spacing:.05em;}
+.hero-tags{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap;}
+.hero-tag{font-size:11.5px;letter-spacing:.06em;padding:5px 12px;border-radius:20px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.1);}
+.hero-cta{margin-top:22px;display:flex;gap:10px;}
+.hero-cta .btn{flex:1;}
+.hero-cta .btn:last-child{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.45);color:#fff;}
+/* 通用图标容器（活动卡片等复用） */
+.quick-icon{
+  display:flex;align-items:center;justify-content:center;
+  width:44px;height:44px;border-radius:13px;
+  background:linear-gradient(135deg,rgba(92,122,94,.14),rgba(111,154,146,.14));
+}
+.quick-icon svg{width:23px;height:23px;stroke:var(--zhu-deep);fill:none;stroke-width:1.6;}
+
+/* 八景列表 */
+.scene-list{padding:0 20px;display:flex;flex-direction:column;gap:12px;}
+.scene-card{
+  position:relative;display:flex;gap:14px;padding:14px;
+}
+.scene-emoji{
+  width:58px;height:58px;flex:0 0 58px;border-radius:16px;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(145deg,var(--paper-deep),#E7E1CF);
+  border:1px solid var(--line);overflow:hidden;position:relative;
+}
+.scene-emoji svg{width:34px;height:34px;}
+.scene-emoji .no{
+  position:absolute;top:3px;left:6px;font-family:var(--font-title);
+  font-size:10px;color:var(--ink-faint);letter-spacing:.1em;
+}
+.scene-info{flex:1;min-width:0;}
+.scene-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.scene-name{font-family:var(--font-title);font-size:16px;font-weight:700;letter-spacing:.03em;}
+.scene-poem{font-family:var(--font-title);font-size:12.5px;color:var(--zhu-deep);margin-top:3px;letter-spacing:.03em;}
+.scene-desc{
+  font-size:12px;color:var(--ink-soft);margin-top:5px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.scene-arrow{
+  align-self:center;flex:0 0 20px;display:flex;justify-content:center;
+}
+.scene-arrow svg{width:16px;height:16px;stroke:var(--ink-faint);fill:none;stroke-width:1.8;}
+.scene-badge{
+  position:absolute;top:14px;right:14px;
+}
+
+/* 活动预告横幅 */
+.event-banner{
+  margin:18px 20px;border-radius:var(--radius);padding:18px;
+  background:linear-gradient(120deg,#F1E4D6,#E8D9CE);
+  border:1px solid rgba(228,210,194,.8);position:relative;overflow:hidden;cursor:pointer;
+}
+.event-banner::after{
+  content:"春 诗 夏 水 秋 丰 冬 归";position:absolute;right:-10px;bottom:-12px;
+  font-family:var(--font-title);font-size:13px;letter-spacing:.3em;color:rgba(154,111,87,.18);white-space:nowrap;
+}
+.event-banner .eb-kicker{font-size:11px;letter-spacing:.2em;color:#9a6f57;}
+.event-banner .eb-title{font-family:var(--font-title);font-size:18px;font-weight:700;margin:6px 0 4px;color:#6b4a38;letter-spacing:.05em;}
+.event-banner .eb-sub{font-size:12px;color:#8a6a5a;}
+
+/* 图文横滑 */
+.h-scroll{
+  display:flex;gap:12px;overflow-x:auto;padding:6px 20px 14px;
+  scroll-snap-type:x mandatory;scrollbar-width:none;
+}
+.h-scroll::-webkit-scrollbar{display:none;}
+.h-card{flex:0 0 78%;scroll-snap-align:start;}
+
+/* ============ 线路页 ============ */
+.route-hero{
+  margin:16px 20px;border-radius:20px;overflow:hidden;position:relative;
+  background:linear-gradient(135deg,#6F9A92,#4E7C74);color:#F4F1E6;padding:22px;box-shadow:var(--shadow-md);
+}
+.route-hero .rh-k{font-size:11px;letter-spacing:.28em;color:#DCE9E4;}
+.route-hero .rh-t{font-family:var(--font-title);font-size:22px;font-weight:700;margin:8px 0 6px;letter-spacing:.06em;}
+.route-hero .rh-d{font-size:12.5px;opacity:.9;}
+.route-hero .rh-p{font-size:12px;opacity:.8;margin-top:14px;display:flex;align-items:center;gap:6px;}
+.route-hero .rh-p span{background:rgba(255,255,255,.16);padding:3px 10px;border-radius:16px;border:1px solid rgba(255,255,255,.3);}
+
+.route-tabs{
+  display:flex;gap:8px;margin:6px 20px 4px;overflow-x:auto;scrollbar-width:none;
+}
+.route-tabs::-webkit-scrollbar{display:none;}
+.route-tab{
+  flex:0 0 auto;padding:8px 16px;border-radius:20px;font-size:13px;cursor:pointer;
+  background:var(--paper-card);border:1px solid var(--line);color:var(--ink-soft);
+  transition:all .2s;
+}
+.route-tab.active{background:var(--zhu-deep);color:#fff;border-color:var(--zhu-deep);}
+
+.route-list{padding:12px 20px 4px;display:flex;flex-direction:column;gap:14px;}
+.route-card{padding:16px;}
+.route-card .rc-head{display:flex;align-items:flex-start;gap:12px;}
+.route-card .rc-ic{
+  width:44px;height:44px;flex:0 0 44px;border-radius:13px;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(145deg,rgba(92,122,94,.16),rgba(111,154,146,.16));
+}
+.route-card .rc-ic svg{width:22px;height:22px;stroke:var(--zhu-deep);fill:none;stroke-width:1.6;}
+.route-card .rc-t{font-family:var(--font-title);font-size:16px;font-weight:700;letter-spacing:.02em;}
+.route-card .rc-tt{font-size:11px;color:var(--ink-faint);margin-top:1px;}
+.route-card .rc-tags{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
+.route-card .rc-nodes{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);}
+.route-card .rc-nodes .node{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13px;color:var(--ink-soft);}
+.route-card .rc-nodes .node .dot{width:6px;height:6px;border-radius:50%;background:var(--zhu);flex:0 0 6px;}
+.route-card .rc-nodes .node .sep{color:var(--jin);font-size:11px;}
+.route-card .rc-foot{margin-top:12px;display:flex;justify-content:space-between;align-items:center;}
+.route-card .rc-price{font-size:12px;color:var(--ink-faint);}
+.route-card .rc-price b{font-size:17px;color:var(--zhu-deep);font-family:var(--font-title);}
+
+/* 观光小巴 */
+.shuttle{
+  margin:16px 20px;border-radius:var(--radius);padding:18px;
+  background:linear-gradient(135deg,#3E665F,#2F514B);color:#EFF0E6;position:relative;overflow:hidden;cursor:pointer;box-shadow:var(--shadow-md);
+}
+.shuttle::before{
+  content:"";position:absolute;left:-20px;bottom:-30px;width:140px;height:140px;border-radius:50%;
+  background:radial-gradient(circle,rgba(226,221,204,.16),transparent 70%);
+}
+.shuttle .sh-k{font-size:11px;letter-spacing:.2em;color:#C9D8CF;display:flex;align-items:center;gap:8px;}
+.shuttle .sh-k svg{width:16px;height:16px;stroke:#C9D8CF;fill:none;stroke-width:1.6;}
+.shuttle .sh-t{font-family:var(--font-title);font-size:19px;font-weight:700;margin:8px 0 6px;letter-spacing:.05em;}
+.shuttle .sh-d{font-size:12px;opacity:.85;line-height:1.7;}
+.shuttle .sh-line{margin-top:12px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.shuttle .sh-line .stop{font-size:11.5px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);padding:4px 10px;border-radius:14px;}
+.shuttle .sh-line .dot{color:var(--jin);font-size:11px;}
+
+/* ============ 研学页 ============ */
+.study-hero{
+  margin:16px 20px;border-radius:20px;overflow:hidden;position:relative;
+  background:linear-gradient(135deg,#A8BC96,#7A9C6C);color:#27322a;padding:22px;box-shadow:var(--shadow-md);
+}
+.study-hero .sh-k{font-size:11px;letter-spacing:.28em;color:#36422f;}
+.study-hero .sh-t{font-family:var(--font-title);font-size:22px;font-weight:700;margin:8px 0 6px;letter-spacing:.06em;}
+.study-hero .sh-d{font-size:12.5px;opacity:.92;line-height:1.7;}
+
+.stage-tabs{
+  display:flex;gap:8px;margin:8px 20px;overflow-x:auto;scrollbar-width:none;
+}
+.stage-tabs::-webkit-scrollbar{display:none;}
+.stage-tab{
+  flex:0 0 auto;padding:8px 15px;border-radius:20px;font-size:13px;cursor:pointer;
+  background:var(--paper-card);border:1px solid var(--line);color:var(--ink-soft);
+}
+.stage-tab.active{background:var(--zhu-deep);color:#fff;border-color:var(--zhu-deep);}
+
+.pack-list{padding:6px 20px 4px;display:flex;flex-direction:column;gap:14px;}
+.pack-card{padding:16px;position:relative;}
+.pack-card .pk-lv{
+  position:absolute;top:14px;right:14px;font-size:11px;letter-spacing:.1em;padding:3px 9px;border-radius:14px;
+}
+.pack-card .pk-name{font-family:var(--font-title);font-size:16.5px;font-weight:700;letter-spacing:.03em;}
+.pack-card .pk-slogan{font-size:12px;color:var(--ink-soft);margin-top:4px;}
+.pack-card .pk-courses{margin-top:12px;display:flex;flex-wrap:wrap;gap:6px;}
+.pack-card .pk-course{font-size:11px;padding:5px 10px;border-radius:14px;background:rgba(92,122,94,.1);color:var(--zhu-deep);border:1px solid rgba(92,122,94,.2);}
+.pack-card .pk-foot{margin-top:14px;display:flex;justify-content:space-between;align-items:center;}
+.pack-card .pk-price{font-size:12px;color:var(--ink-faint);}
+.pack-card .pk-price b{font-size:19px;color:var(--zhu-deep);font-family:var(--font-title);}
+.pack-card .pk-note{font-size:11px;color:var(--ink-faint);margin-top:10px;line-height:1.6;}
+
+/* 预约弹层 */
+.overlay{
+  position:fixed;inset:0;z-index:60;display:none;align-items:flex-end;justify-content:center;
+  background:rgba(42,42,38,.4);backdrop-filter:blur(2px);
+}
+.overlay.show{display:flex;animation:fade .25s;}
+@keyframes fade{from{opacity:0;}to{opacity:1;}}
+.sheet{
+  width:100%;max-width:430px;background:var(--paper);
+  border-radius:24px 24px 0 0;padding:20px 20px calc(24px + env(safe-area-inset-bottom));
+  animation:slideUp .34s cubic-bezier(.2,.8,.3,1);
+}
+@keyframes slideUp{from{transform:translateY(60px);opacity:.4;}to{transform:none;opacity:1;}}
+.sheet .sh-title{font-family:var(--font-title);font-size:19px;font-weight:700;letter-spacing:.04em;text-align:center;margin-bottom:4px;}
+.sheet .sh-sub{font-size:12px;color:var(--ink-faint);text-align:center;margin-bottom:18px;}
+.form-group{margin-bottom:14px;}
+.form-group label{display:block;font-size:13px;color:var(--ink-soft);margin-bottom:6px;letter-spacing:.03em;}
+.form-input{
+  width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);
+  background:var(--paper-card);font-size:14px;font-family:var(--font-body);color:var(--ink);
+}
+.form-input:focus{outline:none;border-color:var(--zhu);}
+.form-row{display:flex;gap:10px;}
+.form-row .form-group{flex:1;}
+.field-num{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:var(--paper-card);}
+.field-num .f-cnt{display:flex;align-items:center;gap:14px;}
+.field-num .f-cnt button{width:28px;height:28px;border-radius:50%;border:1px solid var(--line);background:#fff;font-size:16px;cursor:pointer;color:var(--zhu-deep);}
+.field-num .f-cnt span{font-size:15px;min-width:20px;text-align:center;}
+
+/* ============ 商城页 ============ */
+.shop-hero{
+  margin:16px 20px;border-radius:20px;overflow:hidden;position:relative;
+  background:linear-gradient(135deg,#C2A46A,#9C7B46);color:#fff;padding:22px;box-shadow:var(--shadow-md);
+}
+.shop-hero .sh-k{font-size:11px;letter-spacing:.28em;color:#F3E9D2;}
+.shop-hero .sh-t{font-family:var(--font-title);font-size:22px;font-weight:700;margin:8px 0 6px;letter-spacing:.06em;}
+.shop-hero .sh-d{font-size:12.5px;opacity:.95;}
+
+.shop-cats{display:flex;gap:8px;margin:6px 20px;overflow-x:auto;scrollbar-width:none;}
+.shop-cats::-webkit-scrollbar{display:none;}
+.shop-cat{flex:0 0 auto;padding:8px 15px;border-radius:20px;font-size:13px;cursor:pointer;background:var(--paper-card);border:1px solid var(--line);color:var(--ink-soft);}
+.shop-cat.active{background:var(--jin);border-color:var(--jin);color:#fff;}
+
+.goods-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:10px 20px 4px;}
+.goods-card{overflow:hidden;position:relative;}
+.goods-cover{
+  aspect-ratio:1/1;background:linear-gradient(145deg,#EDE8DA,#E4DDC9);position:relative;overflow:hidden;
+}
+.goods-cover svg{position:absolute;inset:0;margin:auto;width:52%;height:52%;opacity:.85;}
+.goods-cover .gk{position:absolute;top:8px;left:8px;font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(255,255,255,.7);color:var(--ink-soft);}
+.goods-info{padding:11px 12px 13px;}
+.goods-name{font-size:13px;font-weight:500;line-height:1.4;min-height:36px;}
+.goods-price{font-size:11.5px;color:var(--ink-faint);margin-top:6px;}
+.goods-price b{font-size:17px;color:var(--zhu-deep);font-family:var(--font-title);}
+.goods-add{
+  position:absolute;right:10px;bottom:12px;width:30px;height:30px;border-radius:50%;
+  background:linear-gradient(135deg,var(--zhu),var(--shui-deep));color:#fff;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;box-shadow:var(--shadow-sm);
+}
+
+/* 购物车浮条 */
+.cart-bar{
+  position:sticky;bottom:calc(var(--tabbar-h) + 12px);z-index:40;
+  display:flex;align-items:center;gap:12px;margin:0 20px;padding:12px 14px;
+  background:var(--ink);color:#F4F1E6;border-radius:16px;box-shadow:var(--shadow-lg);
+  cursor:pointer;
+}
+.cart-bar .cb-total{flex:1;font-size:14px;}
+.cart-bar .cb-total b{font-size:19px;color:#EFE0BE;font-family:var(--font-title);}
+.cart-bar .cb-btn{background:var(--jin);color:#fff;padding:9px 16px;border-radius:12px;font-size:13px;}
+
+/* 商品详情 */
+.good-detail .gd-cover{width:100%;aspect-ratio:1/1;background:linear-gradient(145deg,#EDE8DA,#DFD8C2);display:flex;align-items:center;justify-content:center;position:relative;}
+.good-detail .gd-cover svg{width:44%;height:44%;opacity:.9;}
+.good-detail .gd-body{padding:18px 20px;}
+.good-detail .gd-name{font-family:var(--font-title);font-size:21px;font-weight:700;letter-spacing:.04em;}
+.good-detail .gd-tags{display:flex;gap:8px;margin:10px 0;}
+.good-detail .gd-price{font-size:13px;color:var(--ink-faint);}
+.good-detail .gd-price b{font-size:26px;color:var(--zhu-deep);font-family:var(--font-title);}
+.good-detail .gd-sub{font-size:14px;color:var(--ink-soft);margin-top:10px;line-height:1.8;}
+.good-detail .gd-sec{margin-top:20px;}
+.good-detail .gd-sec h4{font-family:var(--font-title);font-size:16px;margin-bottom:8px;letter-spacing:.03em;}
+.good-detail .gd-sec p{font-size:13px;color:var(--ink-soft);line-height:1.85;}
+
+/* ============ 个人中心 ============ */
+.mine-hero{
+  margin:16px 20px;border-radius:20px;overflow:hidden;position:relative;color:#F4F1E6;
+  background:linear-gradient(135deg,#4E7C74,#3E665F);padding:22px;box-shadow:var(--shadow-md);
+}
+.mine-hero .mh-top{display:flex;align-items:center;gap:14px;}
+.mine-hero .avatar{
+  width:58px;height:58px;border-radius:50%;flex:0 0 58px;
+  background:linear-gradient(135deg,#EFE0BE,#C2A46A);
+  display:flex;align-items:center;justify-content:center;font-family:var(--font-title);font-size:24px;color:#5b4623;
+}
+.mine-hero .mh-name{font-family:var(--font-title);font-size:19px;font-weight:700;letter-spacing:.04em;}
+.mine-hero .mh-id{font-size:11.5px;opacity:.75;margin-top:3px;letter-spacing:.05em;}
+.mine-hero .mh-tags{display:flex;gap:6px;margin-top:8px;}
+.mine-hero .mh-tag{font-size:10.5px;padding:3px 9px;border-radius:12px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.1);}
+.mine-hero .mh-stats{display:flex;margin-top:20px;border-top:1px solid rgba(255,255,255,.2);padding-top:16px;}
+.mine-hero .stat{flex:1;text-align:center;}
+.mine-hero .stat b{font-family:var(--font-title);font-size:22px;font-weight:700;color:#EFE0BE;}
+.mine-hero .stat .lb{font-size:11px;opacity:.8;margin-top:2px;letter-spacing:.06em;}
+
+.mine-cards{margin:16px 20px;border-radius:var(--radius);background:var(--paper-card);border:1px solid rgba(224,218,202,.7);overflow:hidden;box-shadow:var(--shadow-sm);}
+.mine-cell{display:flex;align-items:center;gap:14px;padding:15px 16px;cursor:pointer;transition:background .18s;}
+.mine-cell:active{background:var(--paper-deep);}
+.mine-cell + .mine-cell{border-top:1px solid var(--line);}
+.mine-cell .mc-ic{width:38px;height:38px;border-radius:11px;flex:0 0 38px;display:flex;align-items:center;justify-content:center;}
+.mine-cell .mc-ic svg{width:20px;height:20px;fill:none;stroke-width:1.7;}
+.mine-cell .mc-t{flex:1;font-size:14px;}
+.mine-cell .mc-d{font-size:12px;color:var(--ink-faint);display:flex;align-items:center;gap:2px;}
+.mine-cell .mc-d svg{width:14px;height:14px;stroke:var(--ink-faint);fill:none;stroke-width:1.8;}
+
+/* 集章卡 */
+.stamp-card{
+  margin:16px 20px;border-radius:var(--radius);padding:18px;
+  background:linear-gradient(135deg,#EFE8D6,#E4DCC4);border:1px solid var(--line);cursor:pointer;
+}
+.stamp-card .sc-t{font-family:var(--font-title);font-size:16px;font-weight:700;letter-spacing:.03em;display:flex;justify-content:space-between;align-items:center;}
+.stamp-card .sc-t .pct{font-size:12px;color:var(--zhu-deep);}
+.stamp-bar{height:8px;border-radius:6px;background:rgba(92,122,94,.15);margin-top:12px;overflow:hidden;}
+.stamp-bar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--zhu),var(--shui));transition:width .6s;}
+.stamp-dots{display:flex;justify-content:space-between;margin-top:12px;flex-wrap:wrap;gap:6px;}
+.stamp-dot{display:flex;flex-direction:column;align-items:center;gap:5px;width:13%;}
+.stamp-dot .sd-ic{width:34px;height:34px;border-radius:50%;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:12px;}
+.stamp-dot.done .sd-ic{background:linear-gradient(135deg,var(--zhu),var(--shui-deep));border-color:var(--zhu);color:#fff;}
+.stamp-dot .sd-lb{font-size:9px;color:var(--ink-faint);}
+.stamp-dot.done .sd-lb{color:var(--zhu-deep);}
+
+/* ============ 详情页 ============ */
+.detail-cover{position:relative;height:200px;overflow:hidden;}
+.detail-cover .dc-art{position:absolute;inset:0;}
+.detail-cover .dc-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(42,42,38,0),rgba(42,42,38,.4));}
+.detail-cover .dc-badge{position:absolute;top:12px;left:16px;z-index:3;}
+.detail-cover .dc-title{position:absolute;left:20px;right:20px;bottom:16px;z-index:3;color:#fff;}
+.detail-cover .dc-title .poem{font-family:var(--font-title);font-size:14px;letter-spacing:.15em;color:#EFE0BE;margin-bottom:4px;}
+.detail-cover .dc-title .name{font-family:var(--font-title);font-size:26px;font-weight:700;letter-spacing:.1em;}
+.detail-cover .dc-title .sub{font-size:12px;opacity:.9;margin-top:4px;letter-spacing:.04em;}
+
+.detail-body{padding:18px 20px 30px;position:relative;}
+.detail-body .db-section{margin-top:22px;}
+.detail-body .db-section h3{
+  font-family:var(--font-title);font-size:17px;font-weight:700;letter-spacing:.04em;
+  display:flex;align-items:center;gap:10px;margin-bottom:12px;color:var(--ink);
+}
+.detail-body .db-section h3::before{
+  content:"";width:4px;height:17px;border-radius:3px;background:linear-gradient(180deg,var(--zhu),var(--shui));flex:0 0 4px;
+}
+.detail-body .db-section p{font-size:13.5px;color:var(--ink-soft);line-height:1.9;}
+.detail-body .db-section ul{list-style:none;margin-top:6px;}
+.detail-body .db-section li{
+  font-size:13.5px;color:var(--ink-soft);line-height:1.8;padding:7px 0 7px 20px;position:relative;
+}
+.detail-body .db-section li::before{
+  content:"";position:absolute;left:2px;top:14px;width:7px;height:7px;border-radius:50%;background:var(--zhu);opacity:.7;
+}
+.poem-quote{
+  margin:16px 0;padding:16px 18px;border-radius:14px;text-align:center;
+  background:linear-gradient(135deg,var(--yue),var(--paper-card));
+  border:1px solid var(--line);font-family:var(--font-title);color:var(--zhu-deep);
+  font-size:14px;letter-spacing:.12em;line-height:1.9;
+}
+.guide-line{
+  margin-top:8px;padding:13px 16px;border-radius:12px;font-size:13px;line-height:1.8;
+  background:rgba(194,164,106,.12);border-left:3px solid var(--jin);color:#6b5130;
+}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px;}
+.info-cell{padding:13px;border-radius:13px;background:var(--paper-card);border:1px solid rgba(224,218,202,.7);}
+.info-cell .ic-lb{font-size:11px;color:var(--ink-faint);margin-bottom:3px;letter-spacing:.05em;}
+.info-cell .ic-vl{font-size:13px;color:var(--ink);font-weight:500;}
+.detail-actions{position:sticky;bottom:calc(var(--tabbar-h) + 12px);z-index:40;padding:0 20px;}
+.detail-actions .btn{box-shadow:var(--shadow-md);}
+
+/* ============ 底部导航 ============ */
+.tabbar{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:430px;z-index:50;
+  display:flex;
+  background:rgba(251,248,240,.92);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border-top:1px solid var(--line);
+  padding:8px 6px calc(8px + env(safe-area-inset-bottom));
+  box-shadow:0 -6px 24px rgba(60,58,45,.08);
+}
+.tab-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding:4px 0;cursor:pointer;position:relative;border:none;background:none;color:var(--ink-faint);
+  font-family:var(--font-body);transition:color .2s;
+}
+.tab-item .tb-ic{position:relative;}
+.tab-item svg{width:24px;height:24px;fill:none;stroke-width:1.7;stroke:currentColor;transition:transform .2s;}
+.tab-item .tb-lb{font-size:10.5px;letter-spacing:.04em;}
+.tab-item.active{color:var(--zhu-deep);}
+.tab-item.active svg{transform:translateY(-1px);}
+.tab-item.active::before{
+  content:"";position:absolute;top:-10px;width:34px;height:3px;border-radius:3px;
+  background:linear-gradient(90deg,var(--zhu),var(--shui));
+}
+.tab-badge{
+  position:absolute;top:-4px;right:-8px;min-width:16px;height:16px;padding:0 4px;
+  border-radius:9px;background:var(--danger);color:#fff;font-size:9.5px;
+  display:flex;align-items:center;justify-content:center;font-family:var(--font-body);
+}
+
+/* 通用隐藏 */
+[hidden]{display:none!important;}
+.fade-in{animation:fadeUp .5s both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+
+.toast{
+  position:fixed;top:0;left:50%;transform:translate(-50%,-120%);
+  z-index:100;background:var(--ink);color:#fff;padding:11px 20px;border-radius:24px;
+  font-size:13px;box-shadow:var(--shadow-lg);transition:transform .35s cubic-bezier(.2,.8,.3,1);white-space:nowrap;
+}
+.toast.show{transform:translate(-50%,18px);}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ================= 首页 ================= -->
+  <div class="page" id="page-home">
+    <div class="safe-top"></div>
+    <div class="page-scroll">
+      <!-- 品牌头部 -->
+      <header class="app-header">
+        <div class="bar">
+          <div class="header-brand">
+            <div class="header-logo" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F4F1E6" stroke-width="1.6">
+                <path d="M3 17c2.5 1.2 5.5 1.2 8 0s5.5-1.2 8 0" stroke-linecap="round"/>
+                <path d="M3 21c2.5 1.2 5.5 1.2 8 0s5.5-1.2 8 0" stroke-linecap="round" opacity=".6"/>
+                <path d="M12 3v9M9 6l3-3 3 3" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div>
+              <div class="t1">诗润新安 · 水韵舍北</div>
+              <div class="t2">八诗八景数字旅游服务平台</div>
+            </div>
+          </div>
+          <div class="header-actions">
+            <button class="icon-btn" onclick="toast('消息中心即将开放')" aria-label="消息">
+              <svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><circle cx="12" cy="10.5" r="1"/><circle cx="16" cy="10.5" r="1"/><circle cx="8" cy="10.5" r="1"/></svg>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- 主视觉 -->
+      <section class="hero">
+        <svg class="hero-svg" viewBox="0 0 360 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <path d="M20 150 Q60 120 90 148 T160 150 T240 148 T330 150" fill="none" stroke="rgba(244,241,230,.28)" stroke-width="1.4"/>
+          <path d="M20 168 Q70 138 100 166 T180 168 T260 166 T340 168" fill="none" stroke="rgba(244,241,230,.18)" stroke-width="1.2"/>
+          <path d="M-10 200 Q40 160 90 196 T210 196 T330 198 T400 196" fill="rgba(244,241,230,.06)"/>
+          <g fill="none" stroke="rgba(244,241,230,.3)" stroke-width="1.6">
+            <path d="M120 40l8 16-8 16-8-16z"/>
+            <path d="M132 40l6 12-6 12-6-12z" opacity=".7"/>
+          </g>
+          <circle cx="278" cy="52" r="16" fill="rgba(244,241,230,.16)"/>
+          <circle cx="278" cy="52" r="11" fill="rgba(244,241,230,.1)"/>
+        </svg>
+        <div class="hero-in">
+          <div class="hero-kicker">宋韵诗词沉浸式乡村文旅</div>
+          <div class="hero-title">八诗<br><span class="accent">八景</span>·诗路寻乡</div>
+          <div class="hero-sub">让古典诗词走出典籍，走进乡村，融入日常体验</div>
+          <div class="hero-tags">
+            <span class="hero-tag">研学</span>
+            <span class="hero-tag">微度假</span>
+            <span class="hero-tag">文创</span>
+            <span class="hero-tag">打卡集章</span>
+          </div>
+          <div class="hero-cta">
+            <button class="btn btn-ghost" style="background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.45);color:#fff;" onclick="go('page-route')">开始游线</button>
+            <button class="btn btn-ghost" style="background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.45);color:#fff;" onclick="go('page-study')">研学预约</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 八诗八景 -->
+      <div class="section-title">
+        <span class="st">八诗八景</span>
+        <span class="more" onclick="go('page-route')">查看全部线路 <span>›</span></span>
+      </div>
+      <div class="scene-list" id="scene-list"></div>
+
+      <!-- 四季活动 -->
+      <div class="section-title">
+        <span class="st">四季活动</span>
+        <span class="more" onclick="toast('更多活动敬请期待')">了解更多 <span>›</span></span>
+      </div>
+      <div class="h-scroll" id="event-scroll"></div>
+    </div>
+  </div>
+
+  <!-- ================= 线路导览 ================= -->
+  <div class="page" id="page-route">
+    <div class="safe-top"></div>
+    <div class="page-scroll">
+      <header class="app-header"><div class="bar">
+        <div class="header-brand"><div class="header-logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F4F1E6" stroke-width="1.6"><path d="M3 17c2.5 1.2 5.5 1.2 8 0s5.5-1.2 8 0" stroke-linecap="round"/><path d="M3 21c2.5 1.2 5.5 1.2 8 0s5.5-1.2 8 0" stroke-linecap="round" opacity=".6"/><path d="M12 3v9M9 6l3-3 3 3" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="t1">线路导览</div><div class="t2">游线 · 观光 · 接驳</div></div></div>
+      </div></header>
+
+      <div class="route-hero">
+        <div class="rh-k">ROUTE · 诗路游线</div>
+        <div class="rh-t">循诗而行 · 一路读诗</div>
+        <div class="rh-d">八诗八景串联舍北村与周边村落，半日、一日、两日游任选。</div>
+        <div class="rh-p"><span>跨村观光小巴</span><span>共享单车</span><span>打卡集章</span></div>
+      </div>
+
+      <div class="route-tabs" id="route-tabs">
+        <div class="route-tab active" data-r="all">全部</div>
+        <div class="route-tab" data-r="half">半日游</div>
+        <div class="route-tab" data-r="one">一日游</div>
+        <div class="route-tab" data-r="two">两日游</div>
+        <div class="route-tab" data-r="theme">主题游</div>
+      </div>
+
+      <div class="route-list" id="route-list"></div>
+
+      <!-- 观光小巴 -->
+      <div class="shuttle" onclick="toast('观光小巴预约功能即将上线')">
+        <div class="sh-k"><svg viewBox="0 0 24 24"><path d="M3 12h18M5 6h11l2 4h1a1 1 0 0 1 1 1v5h-2"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/><path d="M7 18h10M5 6v6h14"/></svg>村际观光小巴 · 接驳环线</div>
+        <div class="sh-t">诗润新安 · 主题接驳</div>
+        <div class="sh-d">车身以竹青月白为主色，绘制八咏诗眼句与节点图标，车厢内播放沈约八咏诗吟诵，GPS 定位自动讲解。</div>
+        <div class="sh-line">
+          <span class="stop">舍北村</span><span class="dot">·</span>
+          <span class="stop">下舍村</span><span class="dot">·</span>
+          <span class="stop">舍东村</span><span class="dot">·</span>
+          <span class="stop">士林村</span><span class="dot">·</span>
+          <span class="stop">塘北村</span>
+        </div>
+      </div>
+
+      <div class="pad" style="padding-top:0">
+        <div class="poem-line">“登台，仰观天地月色 · 去朝市，心不恋”</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 研学预约 ================= -->
+  <div class="page" id="page-study">
+    <div class="safe-top"></div>
+    <div class="page-scroll">
+      <header class="app-header"><div class="bar">
+        <div class="header-brand"><div class="header-logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F4F1E6" stroke-width="1.6"><path d="M3 17c2.5 1.2 5.5 1.2 8 0s5.5-1.2 8 0" stroke-linecap="round"/><path d="M3 21c2.5 1.2 5.5 1.2 8 0s5.5-1.2 8 0" stroke-linecap="round" opacity=".6"/><path d="M12 3v9M9 6l3-3 3 3" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="t1">研学预约</div><div class="t2">分学段 · 可带走</div></div></div>
+      </div></header>
+
+      <div class="study-hero">
+        <div class="sh-k">STUDY · 诗词研学</div>
+        <div class="sh-t">可感知 · 可体验 · 可带走</div>
+        <div class="sh-d">依托沈约诗词文化资源与江南水乡自然生态，面向小学至高中及成人团体，打造沉浸式诗词研学。</div>
+      </div>
+
+      <div class="stage-tabs" id="stage-tabs">
+        <div class="stage-tab active" data-s="all">全部</div>
+        <div class="stage-tab" data-s="p">小学·诗词小书生</div>
+        <div class="stage-tab" data-s="m">初中·诗路探索者</div>
+        <div class="stage-tab" data-s="h">高中·文脉传承者</div>
+        <div class="stage-tab" data-s="a">成人·宋韵雅集</div>
+      </div>
+
+      <div class="pack-list" id="pack-list"></div>
+
+      <div class="pad" style="padding-top:0">
+        <div class="poem-line">“诗无达诂，而兴之所至，皆成课堂”</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 文创商城 ================= -->
+  <div class="page" id="page-shop">
+    <div class="safe-top"></div>
+    <div class="page-scroll">
+      <header class="app-header"><div class="bar">
+        <div class="header-brand"><div class="header-logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F4F1E6" stroke-width="1.6"><path d="M3 17c2.5 1.2 5.5 1.2 8 0s5.5-1.2 8 0" stroke-linecap="round"/><path d="M3 21c2.5 1.2 5.5 1.2 8 0s5.5-1.2 8 0" stroke-linecap="round" opacity=".6"/><path d="M12 3v9M9 6l3-3 3 3" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="t1">文创商城</div><div class="t2">诗礼江南 · 伴手礼</div></div></div>
+      </div></header>
+
+      <div class="shop-hero">
+        <div class="sh-k">SHOP · 八诗八景文创</div>
+        <div class="sh-t">一诗一物 · 诗礼相赠</div>
+        <div class="sh-d">围绕八诗八景品牌，打造诗词纪念、乡村伴手礼、日常实用三大文创体系。</div>
+      </div>
+
+      <div class="shop-cats" id="shop-cats">
+        <div class="shop-cat active" data-c="all">全部</div>
+        <div class="shop-cat" data-c="poem">诗词纪念</div>
+        <div class="shop-cat" data-c="gift">乡村伴手礼</div>
+        <div class="shop-cat" data-c="daily">日常实用</div>
+      </div>
+
+      <div class="goods-grid" id="goods-grid"></div>
+
+      <div class="cart-bar" onclick="showCart()">
+        <div class="cb-total">购物车 <b id="cart-count">0</b> 件商品</div>
+        <div class="cb-btn">去结算</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 个人中心 ================= -->
+  <div class="page" id="page-mine">
+    <div class="safe-top"></div>
+    <div class="page-scroll">
+      <header class="app-header"><div class="bar">
+        <div class="header-brand"><div class="header-logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F4F1E6" stroke-width="1.6"><path d="M3 17c2.5 1.2 5.5 1.2 8 0s5.5-1.2 8 0" stroke-linecap="round"/><path d="M3 21c2.5 1.2 5.5 1.2 8 0s5.5-1.2 8 0" stroke-linecap="round" opacity=".6"/><path d="M12 3v9M9 6l3-3 3 3" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="t1">个人中心</div><div class="t2">我的诗路 · 我的印记</div></div></div>
+      </div></header>
+
+      <div class="mine-hero">
+        <div class="mh-top">
+          <div class="avatar">诗</div>
+          <div>
+            <div class="mh-name">诗路旅人</div>
+            <div class="mh-id">诗路会员 · S6 级</div>
+            <div class="mh-tags"><span class="mh-tag">八诗八景</span><span class="mh-tag">研学达人</span></div>
+          </div>
+        </div>
+        <div class="mh-stats">
+          <div class="stat"><b>5</b><div class="lb">足迹</div></div>
+          <div class="stat"><b>3</b><div class="lb">印章</div></div>
+          <div class="stat"><b>2</b><div class="lb">预约</div></div>
+          <div class="stat"><b>1200</b><div class="lb">积分</div></div>
+        </div>
+      </div>
+
+      <!-- 集章卡 -->
+      <div class="stamp-card" onclick="goDetail('d1')">
+        <div class="sc-t"><span>八景集章 · 我的诗路</span><span class="pct">3 / 8</span></div>
+        <div class="stamp-bar"><i style="width:37.5%"></i></div>
+        <div class="stamp-dots">
+          <div class="stamp-dot done"><div class="sd-ic">台</div><div class="sd-lb">登台</div></div>
+          <div class="stamp-dot done"><div class="sd-ic">竹</div><div class="sd-lb">咏竹</div></div>
+          <div class="stamp-dot done"><div class="sd-ic">临</div><div class="sd-lb">临水</div></div>
+          <div class="stamp-dot"><div class="sd-ic">秋</div><div class="sd-lb">望秋</div></div>
+          <div class="stamp-dot"><div class="sd-ic">风</div><div class="sd-lb">听风</div></div>
+          <div class="stamp-dot"><div class="sd-ic">月</div><div class="sd-lb">对月</div></div>
+          <div class="stamp-dot"><div class="sd-ic">雪</div><div class="sd-lb">感雪</div></div>
+          <div class="stamp-dot"><div class="sd-ic">贤</div><div class="sd-lb">怀人</div></div>
+        </div>
+      </div>
+
+      <!-- 我的服务 -->
+      <div class="section-title" style="margin-bottom:8px"><span class="st">我的服务</span></div>
+      <div class="mine-cards">
+        <div class="mine-cell" onclick="showOrder()">
+          <div class="mc-ic" style="background:rgba(92,122,94,.13)"><svg viewBox="0 0 24 24" stroke="#5C7A5E"><path d="M4 7h16M5 4h14a1 1 0 0 1 1 1v15l-3-2-3 2-3-2-3 2-3-2-3 2V5a1 1 0 0 1 1-1z"/></svg></div>
+          <div class="mc-t">我的订单</div>
+          <div class="mc-d">文创 · 研学 <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
+        </div>
+        <div class="mine-cell" onclick="showBooking()">
+          <div class="mc-ic" style="background:rgba(111,154,146,.13)"><svg viewBox="0 0 24 24" stroke="#6F9A92"><path d="M8 4v4M16 4v4M4 8h16v12H4z"/><path d="M4 13h16"/></svg></div>
+          <div class="mc-t">我的预约</div>
+          <div class="mc-d">线路 · 活动 <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
+        </div>
+        <div class="mine-cell" onclick="showStamp()">
+          <div class="mc-ic" style="background:rgba(194,164,106,.14)"><svg viewBox="0 0 24 24" stroke="#8a6a2f"><path d="M12 3l2.5 5 5.5.7-4 3.9.9 5.4-4.9-2.6-4.9 2.6.9-5.4-4-3.9 5.5-.7z"/></svg></div>
+          <div class="mc-t">我的集章</div>
+          <div class="mc-d">八景打卡 <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
+        </div>
+        <div class="mine-cell" onclick="toast('会员权益即将开放')">
+          <div class="mc-ic" style="background:rgba(228,210,194,.35)"><svg viewBox="0 0 24 24" stroke="#9a6f57"><path d="M4 9h16l-2 11H6z"/><path d="M8 9V6a4 4 0 0 1 8 0v3"/></svg></div>
+          <div class="mc-t">我的会员</div>
+          <div class="mc-d">积分 · 权益 <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
+        </div>
+        <div class="mine-cell" onclick="toast('客服热线：0572-8 8 8 8 8 8')">
+          <div class="mc-ic" style="background:rgba(111,154,146,.13)"><svg viewBox="0 0 24 24" stroke="#6F9A92"><path d="M4 13a8 8 0 0 1 16 0"/><path d="M4 13h3v6H6a2 2 0 0 1-2-2zM20 13h-3v6h1a2 2 0 0 0 2-2z"/></svg></div>
+          <div class="mc-t">客服中心</div>
+          <div class="mc-d">答疑 · 建议 <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
+        </div>
+      </div>
+
+      <div class="section-title" style="margin-bottom:8px"><span class="st">设置</span></div>
+      <div class="mine-cards">
+        <div class="mine-cell" onclick="toast('设置功能演示')">
+          <div class="mc-ic" style="background:rgba(138,143,136,.14)"><svg viewBox="0 0 24 24" stroke="#6e736e"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6L17 7M7 17l-1.4 1.4"/></svg></div>
+          <div class="mc-t">设置</div>
+          <div class="mc-d">偏好 <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
+        </div>
+        <div class="mine-cell" onclick="toast('诗润新安·水韵舍北v1.0')">
+          <div class="mc-ic" style="background:rgba(138,143,136,.14)"><svg viewBox="0 0 24 24" stroke="#6e736e"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></div>
+          <div class="mc-t">关于我们</div>
+          <div class="mc-d">品牌 · 版本 <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
+        </div>
+      </div>
+
+      <div class="pad">
+        <div class="poem-line">“解佩去朝市，守山东，志弥坚”</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 八景详情页 ================= -->
+  <div class="page" id="page-detail">
+    <div class="safe-top"></div>
+    <div class="page-scroll">
+      <header class="app-header"><div class="bar">
+        <button class="header-back" onclick="back()">
+          <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg><span>返回</span>
+        </button>
+        <div style="font-size:14px;color:var(--ink-soft)">八景详情</div>
+        <div style="width:52px"></div>
+      </div></header>
+
+      <div id="detail-root"></div>
+    </div>
+  </div>
+
+  <!-- ================= 商品详情页 ================= -->
+  <div class="page" id="page-goods">
+    <div class="safe-top"></div>
+    <div class="page-scroll">
+      <header class="app-header"><div class="bar">
+        <button class="header-back" onclick="back()">
+          <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg><span>返回</span>
+        </button>
+        <div style="font-size:14px;color:var(--ink-soft)">商品详情</div>
+        <div style="width:52px"></div>
+      </div></header>
+      <div id="goods-root"></div>
+    </div>
+  </div>
+
+  <!-- ================= 底部导航 ================= -->
+  <nav class="tabbar" id="tabbar">
+    <button class="tab-item active" data-tab="home" onclick="go('page-home')">
+      <span class="tb-ic"><svg viewBox="0 0 24 24"><path d="M4 20V10l8-6 8 6v10"/><path d="M9 20v-6h6v6"/></svg></span>
+      <span class="tb-lb">首页</span>
+    </button>
+    <button class="tab-item" data-tab="route" onclick="go('page-route')">
+      <span class="tb-ic"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></span>
+      <span class="tb-lb">线路</span>
+    </button>
+    <button class="tab-item" data-tab="study" onclick="go('page-study')">
+      <span class="tb-ic"><svg viewBox="0 0 24 24"><path d="M4 5h16v15H5a1 1 0 0 1-1-1z"/><path d="M8 9h8M8 13h8"/></svg></span>
+      <span class="tb-lb">研学</span>
+    </button>
+    <button class="tab-item" data-tab="shop" onclick="go('page-shop')">
+      <span class="tb-ic"><svg viewBox="0 0 24 24"><path d="M4 8h16l-1 13H5z"/><path d="M8 10V6a4 4 0 0 1 8 0v4"/></svg><span class="tab-badge" id="cart-badge" hidden>0</span></span>
+      <span class="tb-lb">商城</span>
+    </button>
+    <button class="tab-item" data-tab="mine" onclick="go('page-mine')">
+      <span class="tb-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg></span>
+      <span class="tb-lb">我的</span>
+    </button>
+  </nav>
+
+  <!-- 预约弹层 -->
+  <div class="overlay" id="overlay" onclick="if(event.target===this)closeOverlay()">
+    <div class="sheet" id="sheet"></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+/* ============================================================
+   数据层（全部内嵌，离线可用）
+   ============================================================ */
+var SCENES = [
+  {id:'d1',no:'壹',name:'万善桥',kw:'登台·立志',poem:'登台望秋月',eyeline:'望秋月，秋月光如练',
+   art:'bridge',tag:'国保古桥',village:'舍北村',
+   intent:'沈约登台望月，望的不是月，是一个人站在高处时打开的眼界与胸襟。登台是八咏的第一首，也是游线的第一步。游客踏上万善桥，就是"入诗"的开始。',
+   sceneList:['登台石——桥头一块天然青石，石面刻"登台"二字，游客踏石即入诗','望秋台——桥身最高处设木质平台，可远眺稻田与远山，旁立诗牌刻"望秋月，秋月光如练"','诗路折页领取处——登台石旁竹制小架，放"八咏诗路"折页，盖第一枚"登台"章'],
+   expList:['踏登台石，默念一句自己的"志"','登望秋台远眺，看完整诗路走向','取折页，盖"登台·立志"章，正式入诗'],
+   extend:'登桥如登台。桥是"出村入世"的起点，也是"入诗"的第一重门。',guide:'沈约登台望月，你登台立志。桥是起点，也是你在这条诗路上的第一次抬头。'},
+  {id:'d2',no:'贰',name:'德清院院士馆',kw:'怀人·仰贤',poem:'被褐守山东',eyeline:'故人不可见，山东空复情',
+   art:'scholar',tag:'乡贤文脉',village:'舍北村',
+   intent:'沈约《怀人》写对故友贤者的追思，此处转化为对历代乡贤、现代院士的敬仰。',
+   sceneList:['崇学堂——院士馆内设，用于讲学、家风家训传承','怀人廊——馆外长廊，廊下挂历代乡贤名士木牌，游客可系祈福带'],
+   expList:['瞻仰乡贤名士，了解舍北文脉','在怀人廊系祈福带，寄托敬意','参加家风家训主题研学'],
+   extend:'沈约怀古人，今人怀沈约与院士，形成跨时空的"贤脉"传承。',guide:'怀人仰贤，一脉相承。'},
+  {id:'d3',no:'叁',name:'沈约纪念馆·纪念碑·公园',kw:'咏竹·明志',poem:'解佩去朝市',eyeline:'去朝市，心不恋。守山东，志弥坚',
+   art:'bamboo',tag:'咏竹明志',village:'舍北村',
+   intent:'馆为"心"，竹为"骨"。游客在此明志——学沈约之才，更学其节。三节点一线：知竹→成竹→行竹，一个动作，就是"学沈约"。',
+   sceneList:['沈约纪念馆（触竹·知其人）——弧形竹简墙刻八咏全诗，双竹简筒：一筒装八咏诗词，一筒为空白竹简供抄录','沈约纪念碑（成竹·立其志）——碑立缓坡之上，碑前静思台地面刻"虚心、有节、凌云"六字','沈约公园（行竹·践其节）——竹径漫步、做竹简竹笔、竹影茶席，设"竹心堂"办诗会'],
+   expList:['读八咏，选一句心念诗','静立、默思、献花','走竹径、做竹器、竹影茶席'],
+   extend:'碑上是精神的竹，公园里是活着的竹。把刚在心里立下的那根竹，带回日常生活里。',guide:'沈约咏竹，竹为气节象征。'},
+  {id:'d4',no:'肆',name:'沈家角·望秋田',kw:'望秋·知序',poem:'岁暮愍衰草',eyeline:'飘落逐风尽，方知岁早寒',
+   art:'rice',tag:'稻作时序',village:'沈家角',
+   intent:'《岁暮愍衰草》写秋野苍茫、草木知序，田地本身就是"望秋"最好的载体。看稻浪从青到黄、从收到藏，比人造景观更贴近诗的本意。',
+   sceneList:['望秋径——沿田埂走一段，路边立诗牌，边走边读','知序亭——田边高处设竹木亭向稻田挑出，只刻一句"飘落逐风尽，方知岁早寒"','三候田——分种早中晚稻，同一时段可见青、黄、金三色，直观理解"时序"','田园小火车——旺季环稻田观光线，车内播八咏吟诵'],
+   expList:['秋收时下田割稻、拾穗','认养一块田，秋收亲手收割','稻田课堂——讲一粒米的一生','稻草工坊与米食体验'],
+   extend:'望秋不只是秋季的事，是一个四季皆可来的"时序观察地"。从看田、走田到懂田。',guide:'飘落逐风尽，方知岁早寒。'},
+  {id:'d5',no:'伍',name:'舍东村·围巾馆',kw:'临水·照心',poem:'霜来悲落桐',eyeline:'水映天，映人，映心',
+   art:'scarf',tag:'手艺照心',village:'舍东村',
+   intent:'沈约《临水》写临流照影、澄怀观道。舍东村以"围巾"为另一重"水"——柔软、流动、可塑，承载着百姓营生与记忆，照见乡村奋斗。',
+   sceneList:['照心手作工坊——礼堂二楼设织机、染缸、纺线工具，命名"照心坊"，取"以手抵心"之意','"围巾百年"产业展示墙——老照片、旧织机、历代产品，呈现从手工织造到跨境电商的脉络','"织一首诗"互动装置——白坯围巾墙上浸染或手绘沈约诗句，可带走自己的"诗巾"','临水亭——镜面不锈钢为顶，虽无水却见水'],
+   expList:['参观围巾产业展，读懂"一村一品"转型故事','在照心坊亲手织一段围巾、体验植物染','在"织一首诗"墙上留下诗巾','选购舍东村"村礼"围巾作伴手礼'],
+   extend:'舍东的围巾如流水，它不是水，却像水一样柔软、流动、有记忆。在此"临水"，照见乡村手艺人的心。',guide:'沈约临水照心，你在围巾里照见乡土。线过手指的那一刻，舍东的百年，流过你的掌心。'},
+  {id:'d6',no:'陆',name:'笼式足球场',kw:'听风·逐风',poem:'会圃临春风',eyeline:'会圃临春风',
+   art:'wind',tag:'风动少年',village:'舍北村',
+   intent:'沈约《听风》写风声过耳、心随境转。风是流动的、自由的。现代运动与古典诗意并不冲突——少年奔跑带起的风，正是诗中"风"的当代回响。',
+   sceneList:['听风草坪——足球场周边设草坪，放风筝、玩风车、踢球，让风"可听、可玩、可感"'],
+   expList:['放风筝、玩风车','草坪奔跑、野餐','参加南庄村"风筝工坊"与风筝节'],
+   extend:'少年奔跑带起的风，正是沈约诗中"风"的当代回响。',guide:'会圃临春风，听风逐风。'},
+  {id:'d7',no:'柒',name:'十二生肖桥',kw:'对月·咏怀',poem:'夕行闻夜鹤',eyeline:'月下独酌，对影成三',
+   art:'moon',tag:'月下咏怀',village:'十二生肖桥',
+   intent:'沈约《对月》写月下独酌、对影成三。桥横水上，月映桥洞，天然是"对月"之地。',
+   sceneList:['待月亭——桥头设亭，农历十五前后举办"桥上对月诗会"','生肖灯——桥栏十二生肖石雕旁设灯，夜间点亮，与月争辉'],
+   expList:['月下桥上对月诗会','点亮生肖灯，与月合影','夜游北庄村"月光夜市"'],
+   extend:'生肖是人间烟火，月亮是诗意永恒，桥连接两者。',guide:'月映桥洞，对影成三。'},
+  {id:'d8',no:'捌',name:'文化礼堂',kw:'感雪·归乡',poem:'晨征听晓鸿',eyeline:'雪落无声，万物归宁',
+   art:'snow',tag:'归乡终点',village:'舍北村',
+   intent:'沈约《感雪》写雪落无声、万物归宁。雪是收敛、是回归、是年终的安宁。游线终点即"归乡"——从诗出发，回到文化的根与精神的乡。',
+   sceneList:['归乡广场——礼堂前广场，冬季可人工造雪，打造"舍北初雪"场景','"沈约诗路"全景沙盘——礼堂内回顾全程，写下自己的"八咏"感悟'],
+   expList:['回顾八景全程，书写八咏感悟','冬季体验"舍北初雪"','参加年猪饭、冬至圆子等冬季民俗'],
+   extend:'从诗出发，最终回到文化的根与精神的乡。',guide:'雪落无声，万物归宁。归乡即安。'}
+];
+
+var EVENTS = [
+  {t:'春 · 诗',d:'插秧踏青 · 读"昔时兮春日"',k:'春诗',c:'#7A9C6C',art:'spring'},
+  {t:'夏 · 水',d:'稻田夜观 · 水乡夜游',k:'夏水',c:'#6F9A92',art:'summer'},
+  {t:'秋 · 丰',d:'割稻晒秋 · 稻田诗会',k:'秋丰',c:'#C2A46A',art:'autumn'},
+  {t:'冬 · 归',d:'舍北初雪 · 年猪饭',k:'冬归',c:'#8A8F88',art:'winter'}
+];
+
+var ROUTES = [
+  {t:'"诗润初心"文化寻踪线',type:'half',typeLb:'半日游',dur:'约 3 小时',lvl:'入门 · 文化',
+   nodes:['万善桥 · 登台立志','沈约纪念馆 · 知竹','沈约纪念碑 · 成竹','沈约公园 · 行竹'],
+   desc:'在国保万善桥登台望秋月；竹简墙抽诗签、写心愿；纪念碑静思台拍照；竹心堂体验竹编手作、品竹叶茶。',
+   tip:'建议上午游览，竹心堂手作需提前预约，全程步行约 2 公里。',price:'0',priceTxt:'免费入村'},
+  {t:'"竹韵清风"诗意休闲线',type:'half',typeLb:'半日游',dur:'约 3.5 小时',lvl:'亲子 · 休闲',
+   nodes:['沈约公园 · 行竹','笼式足球场 · 听风','院士馆 · 怀人仰贤','文化礼堂 · 感雪归乡'],
+   desc:'竹径漫步、茶席体验；听风草坪放风筝；怀人廊系祈福带；文化礼堂诗路沙盘一览八景全貌。',
+   tip:'适合亲子家庭，足球场周边可野餐，院士馆周一闭馆请注意。',price:'0',priceTxt:'免费入村'},
+  {t:'"八诗初遇"全景打卡线',type:'one',typeLb:'一日游',dur:'约 7 小时',lvl:'全景 · 跨村',
+   nodes:['万善桥','沈约纪念馆','沈约公园（午餐）','下舍村虹干桥 · 临水照心','士林村荷叶浦漾 · 望秋知序','返回舍北'],
+   desc:'上午深度游览舍北核心文化节点，竹心堂享用诗路简餐；下午乘观光小巴前往下舍村照心亭、士林村望秋台。',
+   tip:'串联"登台、知竹、行竹、临水、望秋"五首诗境，建议购观光小巴日票（15 元/人），跨村段约 10 公里。',price:'15',priceTxt:'小巴日票'},
+  {t:'"水乡寻月"跨村漫游线',type:'one',typeLb:'一日游',dur:'约 8 小时（含夜游）',lvl:'桥韵 · 夜游',
+   nodes:['舍北游客中心','舍东村古石拱桥 · 对月咏怀','下舍村虹干桥 · 临水照心','士林村荷叶浦漾 · 望秋知序','舍北文化礼堂（晚餐）'],
+   desc:'主打水乡桥韵，串联三座古桥，每桥对应一首诗境；傍晚返舍北品尝农家菜；夜间参加舍东村"月下水乡"夜游。',
+   tip:'夜游仅夏季周末开放，建议提前查询。',price:'15',priceTxt:'小巴日票'},
+  {t:'"诗境深度"沉浸体验线',type:'two',typeLb:'两日游',dur:'2 天 1 晚',lvl:'深度 · 沉浸',
+   nodes:['Day1：万善桥','沈约纪念馆','沈约纪念碑','沈约公园（竹编+茶席）','村内民宿','夜间诗会/夜游','Day2：下舍村照心亭','士林村望秋台','稻田田埂步道','文化礼堂沙盘','文创购物','返程'],
+   desc:'覆盖八诗八景全部核心节点，深度体验沈约诗词文化与江南水乡生活。',
+   tip:'村内民宿数量有限建议提前预订，手作体验需提前预约。',price:'0',priceTxt:'民宿另计'},
+  {t:'亲子研学线',type:'theme',typeLb:'主题游',dur:'按需定制',lvl:'亲子 · 研学',
+   nodes:['诗词闯关','自然观察','竹编 DIY','寻景打卡'],
+   desc:'配合研学套餐，增加诗词闯关、自然观察等互动环节，寓教于乐。',tip:'适合 6-12 岁亲子家庭。',price:'0',priceTxt:'按套餐计'},
+  {t:'情侣浪漫线',type:'theme',typeLb:'主题游',dur:'按需定制',lvl:'浪漫 · 仪式',
+   nodes:['对月亭','照心亭','心愿卡','同心锁'],
+   desc:'主打对月亭、照心亭等浪漫节点，配合心愿卡、同心锁等仪式感体验。',tip:'推荐傍晚出行。',price:'0',priceTxt:'按需计'},
+  {t:'摄影采风线',type:'theme',typeLb:'主题游',dur:'按需定制',lvl:'摄影 · 风光',
+   nodes:['古桥晨雾','荷塘月色','稻田夕阳','月下水乡'],
+   desc:'推荐最佳拍摄机位和时段，含古桥晨雾、荷塘月色、稻田夕阳等经典场景。',tip:'清晨与黄昏光线最佳。',price:'0',priceTxt:'按需计'}
+];
+
+var PACKS = [
+  {stage:'p',stageLb:'小学 · 诗词小书生',name:'"诗词小书生"启蒙研学',slogan:'诗词启蒙 + 趣味体验，在游玩中接触传统文化',
+   courses:['跟着沈约读古诗','小小竹编师','水乡自然观察','诗路闯关定向越野'],price:'168',priceUnit:'/人·天',note:'以上为散客参考价，20 人以上团体享 8-9 折。'},
+  {stage:'m',stageLb:'初中 · 诗路探索者',name:'"诗路探索者"文化研学',slogan:'文化理解 + 实践探究，结合课本深化诗词理解',
+   courses:['沈约与四声八病音韵学','八咏诗与八处景实地考察','水乡生态与人文调研','我为舍北写首诗'],price:'188',priceUnit:'/人·天',note:'可结合初中语文古诗词内容定制课程。'},
+  {stage:'h',stageLb:'高中 · 文脉传承者',name:'"文脉传承者"深度研学',slogan:'学术探究 + 思辨讨论，开展深度文化考察与课题研究',
+   courses:['南朝文学与沈约专题讲座','乡村振兴与文化活化课题','传统诗词当代传播工坊','乡贤文化与家国情怀研讨'],price:'208',priceUnit:'/人·天',note:'结合高中语文、历史、地理多学科知识。'},
+  {stage:'a',stageLb:'成人 · 宋韵雅集',name:'"宋韵雅集"文化体验营',slogan:'休闲体验 + 文化沉浸，高品质宋韵文化体验',
+   courses:['宋式点茶','诗词雅集','竹编手作','水乡夜游','农家宴'],price:'228',priceUnit:'/人·天',note:'面向成人团体、企业团建、文化爱好者。'},
+  {stage:'all',stageLb:'全学段',name:'研学产品三档套餐',slogan:'每个学段的研学产品均设置基础包、升级包、尊享包三个层级',
+   courses:['基础包','升级包','尊享包'],price:'',priceUnit:'',note:'三档套餐的具体内容与价格待定价后公布。需提前 7 天预约，旺季（3-5月、9-11月）建议提前 15 天预约。'}
+];
+
+var GOODS = [
+  {id:'g1',cat:'poem',name:'八景诗书签 · 八枚套装',price:28,desc:'八咏诗眼句精印，一枚一景，收藏与赠礼皆宜。',art:'bookmark',tag:'诗词纪念'},
+  {id:'g2',cat:'poem',name:'诗笺明信片 · 手绘水彩',price:15,desc:'淡彩江南水乡手绘，可书写寄语，附邮票位。',art:'postcard',tag:'诗词纪念'},
+  {id:'g3',cat:'poem',name:'诗词卷轴摆件 · 咏竹',price:58,desc:'"解佩去朝市"卷轴装裱，案头雅物。',art:'scroll',tag:'诗词纪念'},
+  {id:'g4',cat:'poem',name:'问桥签 · 登台签筒',price:46,desc:'取"登台立志"意，抽一支签，立一个志。',art:'lot',tag:'诗词纪念'},
+  {id:'g5',cat:'gift',name:'熏豆茶 · 桑叶茶礼盒',price:66,desc:'本地烘豆茶、桑叶茶组合，江南味伴手礼。',art:'tea',tag:'乡村伴手礼'},
+  {id:'g6',cat:'gift',name:'四声韵糕点礼盒',price:88,desc:'取"四声八病"音韵意，四味糕点组合。',art:'cake',tag:'乡村伴手礼'},
+  {id:'g7',cat:'gift',name:'宋韵伴手礼套装',price:128,desc:'帆布包+徽章+贴纸+诗签，一站式礼盒。',art:'gift',tag:'乡村伴手礼'},
+  {id:'g8',cat:'gift',name:'宅十堂农产品 · 伴手礼',price:58,desc:'本地农产甄选，直邮到家，共富助农。',art:'farm',tag:'乡村伴手礼'},
+  {id:'g9',cat:'daily',name:'八诗八景帆布包',price:39,desc:'竹青月白主题帆布包，诗意日常通勤。',art:'bag',tag:'日常实用'},
+  {id:'g10',cat:'daily',name:'徽章套装 · 八景系列',price:36,desc:'八景图案金属徽章，可别于包袋、衣帽。',art:'pin',tag:'日常实用'},
+  {id:'g11',cat:'daily',name:'竹制手机壳 · 诗路纹样',price:49,desc:'导视纹样衍生，素雅竹青配色。',art:'phone',tag:'日常实用'},
+  {id:'g12',cat:'daily',name:'八咏诗路折页 · 集章册',price:9,desc:'八景集章册，一路读诗一路集章，集齐兑换文创。',art:'passport',tag:'日常实用'}
+];
+
+/* ============================================================
+   图标 & SVG 生成（全部内联）
+   ============================================================ */
+function sceneArt(a){
+  var map={
+    bridge:'<svg viewBox="0 0 24 24" fill="none" stroke="#47624A" stroke-width="1.5"><path d="M4 9c2-2 4-2 6 0s4 2 6 0 3-1.5 4 0" stroke-linecap="round"/><path d="M4 14c2-2 4-2 6 0s4 2 6 0 3-1.5 4 0" stroke-linecap="round" opacity=".55"/><path d="M7 9v6M17 9v6" stroke-linecap="round"/></svg>',
+    scholar:'<svg viewBox="0 0 24 24" fill="none" stroke="#47624A" stroke-width="1.5"><path d="M4 9l8-4 8 4-8 4z"/><path d="M8 11v5c3 2 5 2 8 0v-5"/><path d="M20 9v6" stroke-linecap="round"/></svg>',
+    bamboo:'<svg viewBox="0 0 24 24" fill="none" stroke="#47624A" stroke-width="1.5"><path d="M12 3v16M12 9l-4-2M12 14l4-2M12 11l-3 1M12 16l3 1" stroke-linecap="round"/></svg>',
+    rice:'<svg viewBox="0 0 24 24" fill="none" stroke="#8a6a2f" stroke-width="1.5"><path d="M12 4c0 3 3 4 3 8 0 2.5-1.5 4-3 4s-3-1.5-3-4c0-4 3-5 3-8" stroke-linecap="round"/><path d="M9 12h6" stroke-linecap="round" opacity=".6"/></svg>',
+    scarf:'<svg viewBox="0 0 24 24" fill="none" stroke="#9a6f57" stroke-width="1.5"><path d="M6 8h12v4a6 6 0 0 1-6 6 6 6 0 0 1-6-6z"/><path d="M6 10H4M20 10h-2" stroke-linecap="round" opacity=".6"/></svg>',
+    wind:'<svg viewBox="0 0 24 24" fill="none" stroke="#4E7C74" stroke-width="1.5"><path d="M3 8c2-1.5 4-1.5 6 0s4 1.5 6 0 3-1.5 4-.5" stroke-linecap="round"/><path d="M3 13c2-1.5 4-1.5 6 0s4 1.5 6 0 3-1.5 4-.5" stroke-linecap="round" opacity=".6"/><path d="M3 18c2-1.5 4-1.5 6 0s4 1.5 6 0 3-1.5 4-.5" stroke-linecap="round" opacity=".35"/></svg>',
+    moon:'<svg viewBox="0 0 24 24" fill="none" stroke="#6E736E" stroke-width="1.5"><path d="M20 14a8 8 0 1 1-9-9 6.5 6.5 0 0 0 9 9z"/><circle cx="15" cy="9" r="1" fill="currentColor" stroke="none"/><circle cx="18" cy="12" r=".8" fill="currentColor" stroke="none"/></svg>',
+    snow:'<svg viewBox="0 0 24 24" fill="none" stroke="#6E736E" stroke-width="1.5"><circle cx="12" cy="10" r="4"/><path d="M12 6V4M12 16v-2M6 10H4M20 10h-2M8.5 7l-1.4-1.4M15.5 13l1.4 1.4M15.5 7l1.4-1.4M8.5 13l-1.4 1.4" stroke-linecap="round"/></svg>'
+  };
+  return map[a]||map.bridge;
+}
+
+function eventArt(a,c){
+  var map={
+    spring:'<svg viewBox="0 0 24 24" fill="none" stroke="'+c+'" stroke-width="1.5"><path d="M12 21v-9M12 12a3.5 3.5 0 0 0-3.5-3.5C7 8.5 7 11 9 12M12 12a3.5 3.5 0 0 1 3.5-3.5c1.5 0 1.5 2.5-.5 3.5M12 21V9" stroke-linecap="round"/></svg>',
+    summer:'<svg viewBox="0 0 24 24" fill="none" stroke="'+c+'" stroke-width="1.5"><path d="M4 17c2.5 1.2 5.5 1.2 8 0s5.5-1.2 8 0" stroke-linecap="round"/><path d="M4 21c2.5 1.2 5.5 1.2 8 0s5.5-1.2 8 0" stroke-linecap="round" opacity=".5"/><path d="M12 3v4M9 5h6" stroke-linecap="round"/></svg>',
+    autumn:'<svg viewBox="0 0 24 24" fill="none" stroke="'+c+'" stroke-width="1.5"><path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round"/><path d="M8 8l-1 2h2l1-2M14 14l-1 2h2l1-2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    winter:'<svg viewBox="0 0 24 24" fill="none" stroke="'+c+'" stroke-width="1.5"><circle cx="12" cy="12" r="4"/><path d="M12 4v3M12 17v3M4 12h3M17 12h3M6.5 6.5l2 2M15.5 15.5l2 2M17.5 6.5l-2 2M8.5 15.5l-2 2" stroke-linecap="round"/></svg>'
+  };
+  return map[a]||map.summer;
+}
+
+function goodArt(a){
+  var map={
+    bookmark:'<svg viewBox="0 0 24 24" fill="none" stroke="#5C7A5E" stroke-width="1.5"><path d="M7 4h10v16l-5-3-5 3z"/><path d="M10 8h4M10 11h4" stroke-linecap="round"/></svg>',
+    postcard:'<svg viewBox="0 0 24 24" fill="none" stroke="#5C7A5E" stroke-width="1.5"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 11h18M6 15h4" stroke-linecap="round"/><path d="M16 14l3-1" stroke-linecap="round"/></svg>',
+    scroll:'<svg viewBox="0 0 24 24" fill="none" stroke="#8a6a2f" stroke-width="1.5"><rect x="5" y="4" width="14" height="16" rx="1.5"/><path d="M9 4v16M14 9h2M14 12h2" stroke-linecap="round"/></svg>',
+    lot:'<svg viewBox="0 0 24 24" fill="none" stroke="#8a6a2f" stroke-width="1.5"><path d="M5 4h14v3H5zM7 7v10h10V7" stroke-linecap="round"/><path d="M12 10l1.5 1.5L12 13l-1.5-1.5z"/></svg>',
+    tea:'<svg viewBox="0 0 24 24" fill="none" stroke="#4E7C74" stroke-width="1.5"><path d="M5 10h11v6a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4z"/><path d="M16 10h2a2 2 0 0 1 0 4h-2" stroke-linecap="round"/><path d="M8 4c0 1.5 2 1.5 2 3M11 4c0 1.5 2 1.5 2 3" stroke-linecap="round"/></svg>',
+    cake:'<svg viewBox="0 0 24 24" fill="none" stroke="#C2A46A" stroke-width="1.5"><path d="M4 13h16v7H4zM6 13V9h12v4M9 9V6h6v3" stroke-linecap="round"/><path d="M12 6c0-1 1-2 2-2M12 6c0-1-1-2-2-2" stroke-linecap="round"/></svg>',
+    gift:'<svg viewBox="0 0 24 24" fill="none" stroke="#C2A46A" stroke-width="1.5"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M12 8v12M4 12h16M12 8a3 3 0 0 0-3-3c-1.5 0-2.5 1-2 2.5S9 8 12 8zM12 8a3 3 0 0 1 3-3c1.5 0 2.5 1 2 2.5S15 8 12 8z" stroke-linejoin="round"/></svg>',
+    farm:'<svg viewBox="0 0 24 24" fill="none" stroke="#8a6a2f" stroke-width="1.5"><path d="M4 12h16v8H4zM6 12V8h12v4M8 8V5h8v3" stroke-linecap="round"/><path d="M10 12v4M14 12v4M12 16l-1 4M12 16l1 4" stroke-linecap="round"/></svg>',
+    bag:'<svg viewBox="0 0 24 24" fill="none" stroke="#4E7C74" stroke-width="1.5"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2" stroke-linecap="round"/><path d="M10 14h4" stroke-linecap="round"/></svg>',
+    pin:'<svg viewBox="0 0 24 24" fill="none" stroke="#C2A46A" stroke-width="1.5"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2" stroke-linecap="round"/></svg>',
+    phone:'<svg viewBox="0 0 24 24" fill="none" stroke="#6E736E" stroke-width="1.5"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 18h2M10 6h4" stroke-linecap="round"/></svg>',
+    passport:'<svg viewBox="0 0 24 24" fill="none" stroke="#5C7A5E" stroke-width="1.5"><rect x="6" y="3" width="12" height="18" rx="2"/><circle cx="12" cy="10" r="2.5"/><path d="M9 17h6" stroke-linecap="round"/></svg>'
+  };
+  return map[a]||map.bookmark;
+}
+
+/* 详情页大背景艺术 */
+function detailArt(s){
+  var bg={
+    bridge:'linear-gradient(135deg,#6E8E70,#4E7C74 60%,#3E665F)',
+    scholar:'linear-gradient(135deg,#8A8F88,#6E736E)',
+    bamboo:'linear-gradient(135deg,#7A9C6C,#4E7C74)',
+    rice:'linear-gradient(135deg,#C2A46A,#9C7B46)',
+    scarf:'linear-gradient(135deg,#E4D2C2,#C9A49A,#B9907A)',
+    wind:'linear-gradient(135deg,#7FA8A0,#4E7C74)',
+    moon:'linear-gradient(135deg,#6E736E,#43494A)',
+    snow:'linear-gradient(135deg,#9FA8A6,#7C8583)'
+  };
+  var icon={
+    bridge:'<svg viewBox="0 0 120 80" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1.6"><path d="M15 30c8-8 16-8 24 0s16 8 24 0 16-8 24 0 12-5 16 0" stroke-linecap="round"/><path d="M15 52c8-8 16-8 24 0s16 8 24 0 16-8 24 0 12-5 16 0" stroke-linecap="round" opacity=".45"/><path d="M30 30v22M70 30v22" stroke-linecap="round"/></svg>',
+    scholar:'<svg viewBox="0 0 120 80" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="1.6"><path d="M20 30l40-20 40 20-40 20z"/><path d="M35 36v22c14 9 36 9 50 0V36"/><path d="M100 30v26" stroke-linecap="round"/></svg>',
+    bamboo:'<svg viewBox="0 0 120 80" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1.6"><path d="M60 8v58" stroke-linecap="round"/><path d="M60 22l-22-8M60 34l22-8M60 46l-22-8M60 58l22-8M60 24l-16 2M60 40l16 2" stroke-linecap="round"/></svg>',
+    rice:'<svg viewBox="0 0 120 80" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="1.6"><path d="M60 12c0 12 12 16 12 32 0 10-6 16-12 16s-12-6-12-16c0-16 12-20 12-32" stroke-linecap="round"/><path d="M45 44h30" stroke-linecap="round" opacity=".55"/></svg>',
+    scarf:'<svg viewBox="0 0 120 80" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="1.6"><path d="M30 24h60v14a30 30 0 0 1-30 30 30 30 0 0 1-30-30z"/><path d="M30 30h-8M98 30h-8" stroke-linecap="round" opacity=".5"/></svg>',
+    wind:'<svg viewBox="0 0 120 80" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1.6"><path d="M15 24c8-7 20-7 30 0s22 7 30 0 14-6 20-2" stroke-linecap="round"/><path d="M15 44c8-7 20-7 30 0s22 7 30 0 14-6 20-2" stroke-linecap="round" opacity=".6"/><path d="M15 64c8-7 20-7 30 0s22 7 30 0 14-6 20-2" stroke-linecap="round" opacity=".35"/></svg>',
+    moon:'<svg viewBox="0 0 120 80" fill="none" stroke="rgba(255,255,255,.65)" stroke-width="1.6"><path d="M82 18a34 34 0 1 1-38-38 28 28 0 0 0 38 38z" stroke-linejoin="round"/><circle cx="70" cy="30" r="2.5" fill="rgba(255,255,255,.7)" stroke="none"/><circle cx="80" cy="40" r="2" fill="rgba(255,255,255,.6)" stroke="none"/></svg>',
+    snow:'<svg viewBox="0 0 120 80" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="1.6"><circle cx="60" cy="36" r="18"/><path d="M60 18v-6M60 54v6M42 36h-6M78 36h6M47 23l-4-4M73 49l4 4M73 23l4-4M47 49l-4 4" stroke-linecap="round"/></svg>'
+  };
+  return {bg:bg[s.art]||bg.bridge, icon:icon[s.art]||icon.bridge};
+}
+
+/* ============================================================
+   导航与通用交互
+   ============================================================ */
+var navStack=['page-home'];
+var TAB_MAP={home:'home',route:'route',study:'study',shop:'shop',mine:'mine'};
+function showPage(id){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  var el=document.getElementById(id);
+  if(el)el.classList.add('active');
+  window.scrollTo(0,0);
+}
+function setTab(tab){
+  document.querySelectorAll('.tab-item').forEach(function(t){t.classList.toggle('active',t.dataset.tab===tab);});
+}
+function go(id){
+  navStack.push(id);showPage(id);
+  setTab(TAB_MAP[id]||'');
+}
+function back(){
+  navStack.pop();
+  if(!navStack.length)navStack.push('page-home');
+  var prev=navStack[navStack.length-1];
+  showPage(prev);setTab(TAB_MAP[prev]||'');
+}
+
+var toastTimer;
+function toast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(function(){t.classList.remove('show');},2000);
+}
+function openOverlay(html){
+  document.getElementById('sheet').innerHTML=html;
+  document.getElementById('overlay').classList.add('show');
+}
+function closeOverlay(){
+  document.getElementById('overlay').classList.remove('show');
+}
+
+/* ============================================================
+   首页渲染
+   ============================================================ */
+function renderHome(){
+  var list=document.getElementById('scene-list');
+  list.innerHTML=SCENES.map(function(s){
+    return '<div class="card scene-card" onclick="goDetail(\''+s.id+'\')">'
+      +'<div class="scene-emoji"><span class="no">'+s.no+'</span>'+sceneArt(s.art)+'</div>'
+      +'<div class="scene-info">'
+        +'<div class="scene-top"><span class="scene-name">'+s.name+'</span><span class="tag">'+s.kw+'</span></div>'
+        +'<div class="scene-poem">《'+s.poem+'》</div>'
+        +'<div class="scene-desc">'+s.eyeline+'</div>'
+      +'</div>'
+      +'<div class="scene-arrow"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>'
+    +'</div>';
+  }).join('');
+
+  var ev=document.getElementById('event-scroll');
+  ev.innerHTML=EVENTS.map(function(e){
+    return '<div class="h-card card" style="display:flex;align-items:center;gap:14px;padding:16px;" onclick="toast(\''+e.t+' 活动即将上线\')">'
+      +'<div class="quick-icon" style="width:52px;height:52px;border-radius:15px;background:'+e.c+'26">'+eventArt(e.art,e.c)+'</div>'
+      +'<div style="flex:1">'
+        +'<div style="display:flex;align-items:center;gap:8px"><span class="scene-name">'+e.t+'</span><span class="tag jin">'+e.k+'</span></div>'
+        +'<div style="font-size:12px;color:var(--ink-soft);margin-top:3px">'+e.d+'</div>'
+      +'</div>'
+    +'</div>';
+  }).join('');
+}
+
+/* ============================================================
+   线路渲染
+   ============================================================ */
+var routeFilter='all';
+function renderRoutes(){
+  var box=document.getElementById('route-list');
+  var list=ROUTES.filter(function(r){return routeFilter==='all'||r.type===routeFilter;});
+  box.innerHTML=list.map(function(r){
+    var nodesHtml=r.nodes.map(function(n,i){
+      return '<div class="node"><span class="dot"></span>'+n+'</div>';
+    }).join('');
+    return '<div class="card route-card" onclick="toast(\''+r.t+' 详情即将开放\')">'
+      +'<div class="rc-head">'
+        +'<div class="rc-ic"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></div>'
+        +'<div><div class="rc-t">'+r.t+'</div><div class="rc-tt">'+r.dur+' · '+r.lvl+'</div></div>'
+      +'</div>'
+      +'<div class="rc-tags"><span class="tag fen">'+r.typeLb+'</span></div>'
+      +'<div class="rc-nodes">'+nodesHtml+'</div>'
+      +'<div class="rc-foot"><div class="rc-price">'+r.priceTxt+'<b style="margin-left:6px">'+(r.price==='0'?'免费':('¥'+r.price))+'</b></div><span class="tag jin">详情 ›</span></div>'
+    +'</div>';
+  }).join('');
+}
+function setRouteFilter(f){
+  routeFilter=f;
+  document.querySelectorAll('#route-tabs .route-tab').forEach(function(t){t.classList.toggle('active',t.dataset.r===f);});
+  renderRoutes();
+}
+
+/* ============================================================
+   研学渲染
+   ============================================================ */
+var stageFilter='all';
+function renderPacks(){
+  var box=document.getElementById('pack-list');
+  var list=PACKS.filter(function(p){return stageFilter==='all'||p.stage===stageFilter;});
+  box.innerHTML=list.map(function(p){
+    var lvBadge='';
+    if(p.stage!=='all')lvBadge='<span class="pk-lv tag jin" style="position:static;margin-left:8px">'+p.stageLb+'</span>';
+    var courses=p.courses.map(function(c){return '<span class="pk-course">'+c+'</span>';}).join('');
+    var priceHtml=p.price?'<div class="pk-price"><b>¥'+p.price+'</b>'+p.priceUnit+'</div>':'<div class="pk-price">价格待定</div>';
+    return '<div class="card pack-card">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between"><div class="pk-name">'+p.name+'</div></div>'
+      +'<div class="pk-slogan">'+p.slogan+'</div>'
+      +'<div style="margin-top:8px"><span class="tag shui">'+p.stageLb+'</span></div>'
+      +'<div class="pk-courses">'+courses+'</div>'
+      +'<div class="pk-foot">'+priceHtml
+        +'<button class="btn btn-sm btn-primary" onclick="event.stopPropagation();openBooking(\''+p.name+'\',\''+p.price+'\')">立即预约</button></div>'
+      +'<div class="pk-note">'+p.note+'</div>'
+    +'</div>';
+  }).join('');
+}
+function setStageFilter(f){
+  stageFilter=f;
+  document.querySelectorAll('#stage-tabs .stage-tab').forEach(function(t){t.classList.toggle('active',t.dataset.s===f);});
+  renderPacks();
+}
+
+/* ============================================================
+   商城渲染 & 购物车
+   ============================================================ */
+var cart={};
+var shopFilter='all';
+function cartCount(){var n=0;for(var k in cart)n+=cart[k];return n;}
+function refreshCartBadge(){
+  var n=cartCount();
+  var b=document.getElementById('cart-badge');
+  if(b){b.textContent=n;b.hidden=(n===0);}
+  var cc=document.getElementById('cart-count');
+  if(cc)cc.textContent=n;
+}
+function addCart(id,ev){
+  if(ev)ev.stopPropagation();
+  cart[id]=(cart[id]||0)+1;
+  refreshCartBadge();
+  toast('已加入购物车');
+}
+function renderShop(){
+  var box=document.getElementById('goods-grid');
+  var list=GOODS.filter(function(g){return shopFilter==='all'||g.cat===shopFilter;});
+  box.innerHTML=list.map(function(g){
+    return '<div class="card goods-card" onclick="goGoods(\''+g.id+'\')">'
+      +'<div class="goods-cover"><span class="gk">'+g.tag+'</span>'+goodArt(g.art)+'</div>'
+      +'<div class="goods-info"><div class="goods-name">'+g.name+'</div>'
+        +'<div class="goods-price"><b>¥'+g.price+'</b></div></div>'
+      +'<div class="goods-add" onclick="addCart(\''+g.id+'\',event)">+</div>'
+    +'</div>';
+  }).join('');
+}
+function setShopFilter(c){
+  shopFilter=c;
+  document.querySelectorAll('#shop-cats .shop-cat').forEach(function(t){t.classList.toggle('active',t.dataset.c===c);});
+  renderShop();
+}
+function showCart(){
+  var n=cartCount();
+  if(!n){toast('购物车还是空的，去挑一件诗礼吧');return;}
+  openOverlay(
+    '<div class="sh-title">购物车</div>'
+    +'<div class="sh-sub">共 '+n+' 件诗礼，合计 ¥'+cartTotal()+'</div>'
+    +'<button class="btn btn-primary btn-block" onclick="closeOverlay();toast(\'下单成功，感谢选购\');cart={};refreshCartBadge()">确认下单 · ¥'+cartTotal()+'</button>'
+    +'<button class="btn btn-ghost btn-block" style="margin-top:10px" onclick="closeOverlay()">继续逛逛</button>'
+  );
+}
+function cartTotal(){
+  var t=0;
+  for(var k in cart){var g=GOODS.filter(function(x){return x.id===k;})[0];if(g)t+=g.price*cart[k];}
+  return t;
+}
+
+/* ============================================================
+   详情页
+   ============================================================ */
+function findScene(id){for(var i=0;i<SCENES.length;i++)if(SCENES[i].id===id)return SCENES[i];return SCENES[0];}
+function goDetail(id){
+  var s=findScene(id);
+  var art=detailArt(s);
+  var root=document.getElementById('detail-root');
+  root.innerHTML=
+    '<div class="detail-cover">'
+      +'<div class="dc-art" style="background:'+art.bg+'">'+art.icon+'</div>'
+      +'<div class="dc-overlay"></div>'
+      +'<div class="dc-badge"><span class="tag jin" style="background:rgba(255,255,255,.85)">'+s.no+' · '+s.kw+'</span></div>'
+      +'<div class="dc-title"><div class="poem">《'+s.poem+'》· '+s.eyeline+'</div><div class="name">'+s.name+'</div><div class="sub">'+s.village+' · '+s.tag+'</div></div>'
+    +'</div>'
+    +'<div class="detail-body">'
+      +'<div class="poem-quote">'+s.guide+'</div>'
+      +'<div class="db-section"><h3>文化立意</h3><p>'+s.intent+'</p></div>'
+      +'<div class="db-section"><h3>景设要点</h3><ul>'+s.sceneList.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul></div>'
+      +'<div class="db-section"><h3>体验活动</h3><ul>'+s.expList.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul></div>'
+      +'<div class="db-section"><h3>诗路延伸</h3><p>'+s.extend+'</p>'
+        +'<div class="guide-line">'+s.guide+'</div>'
+      +'</div>'
+      +'<div class="db-section"><h3>路线与门票</h3>'
+        +'<div class="info-grid"><div class="info-cell"><div class="ic-lb">所在村</div><div class="ic-vl">'+s.village+'</div></div>'
+        +'<div class="info-cell"><div class="ic-lb">入园方式</div><div class="ic-vl">免费入村</div></div>'
+        +'<div class="info-cell"><div class="ic-lb">体验建议</div><div class="ic-vl">步行 · 观光小巴</div></div>'
+        +'<div class="info-cell"><div class="ic-lb">集章</div><div class="ic-vl">可盖「'+s.kw+'」章</div></div></div>'
+      +'</div>'
+    +'</div>'
+    +'<div class="detail-actions"><button class="btn btn-primary btn-block" onclick="openBooking(\''+s.name+' 体验\',\'0\')">预约体验 · 查看详情</button></div>';
+  go('page-detail');
+}
+
+/* ============================================================
+   商品详情
+   ============================================================ */
+function findGood(id){for(var i=0;i<GOODS.length;i++)if(GOODS[i].id===id)return GOODS[i];return GOODS[0];}
+function goGoods(id){
+  var g=findGood(id);
+  var root=document.getElementById('goods-root');
+  root.innerHTML=
+    '<div class="good-detail">'
+      +'<div class="gd-cover">'+goodArt(g.art)+'</div>'
+      +'<div class="gd-body">'
+        +'<div class="gd-name">'+g.name+'</div>'
+        +'<div class="gd-tags"><span class="tag">'+g.tag+'</span><span class="tag shui">八诗八景正版</span></div>'
+        +'<div class="gd-price"><b>¥'+g.price+'</b></div>'
+        +'<div class="gd-sub">'+g.desc+'</div>'
+        +'<div class="gd-sec"><h4>产品说明</h4><p>本商品为八诗八景品牌文创，全部采用品牌标准色与辅助纹样设计，呼应沈约诗词意境。乡村伴手礼均为本地农户与手艺人直供，支持共富助农。</p></div>'
+        +'<div class="gd-sec"><h4>配送说明</h4><p>支持到店自提与快递到家，乡村伴手礼类商品可直邮到家。</p></div>'
+      +'</div>'
+      +'<div class="detail-actions"><button class="btn btn-primary btn-block" onclick="addCart(\''+g.id+'\')">加入购物车 · ¥'+g.price+'</button></div>'
+    +'</div>';
+  go('page-goods');
+}
+
+/* ============================================================
+   预约弹层
+   ============================================================ */
+function openBooking(name,price){
+  openOverlay(
+    '<div class="sh-title">预约 · '+name+'</div>'
+    +'<div class="sh-sub">'+(price?price+' · ':'')+'提前 7 天预约，旺季建议提前 15 天</div>'
+    +'<div class="form-group"><label>姓名</label><input class="form-input" placeholder="请输入姓名"></div>'
+    +'<div class="form-group"><label>联系方式</label><input class="form-input" placeholder="请输入手机号"></div>'
+    +'<div class="form-row">'
+      +'<div class="form-group"><label>人数</label><div class="field-num"><div class="f-cnt"><button onclick="this.nextElementSibling.textContent=+this.nextElementSibling.textContent-1<1?1:+this.nextElementSibling.textContent-1">−</button><span>1</span><button onclick="this.previousElementSibling.textContent=+this.previousElementSibling.textContent+1">＋</button></div></div></div>'
+      +'<div class="form-group"><label>日期</label><input class="form-input" placeholder="选择日期"></div>'
+    +'</div>'
+    +'<button class="btn btn-primary btn-block" style="margin-top:8px" onclick="closeOverlay();toast(\'预约提交成功，期待您的诗路之旅\')">提交预约</button>'
+  );
+}
+
+/* ============================================================
+   个人中心演示
+   ============================================================ */
+function showOrder(){openOverlay('<div class="sh-title">我的订单</div><div class="sh-sub">暂无订单，去商城挑一件诗礼吧</div><button class="btn btn-ghost btn-block" onclick="closeOverlay();go(\'page-shop\')">去逛逛商城</button>');}
+function showBooking(){openOverlay('<div class="sh-title">我的预约</div><div class="sh-sub">您有 2 条研学预约记录</div><div class="info-grid"><div class="info-cell"><div class="ic-lb">课程</div><div class="ic-vl">诗词小书生</div></div><div class="info-cell"><div class="ic-lb">状态</div><div class="ic-vl" style="color:var(--zhu-deep)">已确认</div></div><div class="info-cell"><div class="ic-lb">日期</div><div class="ic-vl">2026-09-12</div></div><div class="info-cell"><div class="ic-lb">人数</div><div class="ic-vl">1 人</div></div></div><button class="btn btn-ghost btn-block" style="margin-top:14px" onclick="closeOverlay()">知道了</button></div>');}
+function showStamp(){toast('八景集章：已完成 3 / 8，集满可兑换文创');}
+
+/* ============================================================
+   初始化
+   ============================================================ */
+function bindTabs(){
+  // 线路筛选
+  document.querySelectorAll('#route-tabs .route-tab').forEach(function(t){
+    t.addEventListener('click',function(){setRouteFilter(t.dataset.r);});
+  });
+  // 研学学段筛选
+  document.querySelectorAll('#stage-tabs .stage-tab').forEach(function(t){
+    t.addEventListener('click',function(){setStageFilter(t.dataset.s);});
+  });
+  // 商城分类筛选
+  document.querySelectorAll('#shop-cats .shop-cat').forEach(function(t){
+    t.addEventListener('click',function(){setShopFilter(t.dataset.c);});
+  });
+}
+(function init(){
+  bindTabs();
+  renderHome();
+  renderRoutes();
+  renderPacks();
+  renderShop();
+  refreshCartBadge();
+  go('page-home');
+})();
+</script>
+</body>
+</html>
